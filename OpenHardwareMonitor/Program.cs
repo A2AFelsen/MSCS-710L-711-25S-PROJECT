@@ -10,6 +10,7 @@ namespace OpenHardwareMonitorExample
     class Program
     {
         private static Computer computer;
+        private static PerformanceCounter cpuCounter; // Performance counter for overall CPU usage
 
         static void Main(string[] args)
         {
@@ -33,6 +34,9 @@ namespace OpenHardwareMonitorExample
 
             // Open the hardware monitoring session
             computer.Open();
+
+            // Initialize the CPU performance counter
+            cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             // Set up a timer to run every 30 seconds
             Timer timer = new Timer(30000); // 30,000 milliseconds = 30 seconds
@@ -116,6 +120,12 @@ namespace OpenHardwareMonitorExample
             {
                 Console.WriteLine("  No clock speed sensors found.");
             }
+
+            // Get and display CPU usage
+            float cpuUsage = cpuCounter.NextValue(); // Get the current CPU usage
+            System.Threading.Thread.Sleep(100); // Wait for the counter to get a valid value
+            cpuUsage = cpuCounter.NextValue(); // Get the updated CPU usage
+            Console.WriteLine($"\nCPU Usage: {cpuUsage:F2} %");
 
             // List all running processes
             Console.WriteLine("\nRunning Processes:");
