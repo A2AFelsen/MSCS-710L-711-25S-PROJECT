@@ -50,15 +50,18 @@ namespace OpenHardwareMonitorExample
             // Clean up
             timer.Stop();
             computer.Close();
+            DatabaseHelper.CloseConnection();
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             Console.WriteLine($"Reading sensor data at {DateTime.Now}");
 
-            bool temperatureSensorFound = false;
-            bool powerSensorFound = false;
-            bool clockSpeedSensorFound = false;
+            float? temperature = null;
+            float? power = null;
+            float? usage = null;
+            float? coreSpeed = null;
+            float? memorySpeed = null;
 
             // Read and display hardware sensor data
             foreach (var hardwareItem in computer.Hardware)
@@ -66,59 +69,31 @@ namespace OpenHardwareMonitorExample
                 Console.WriteLine($"Hardware: {hardwareItem.Name}");
                 hardwareItem.Update();
 
-                // Check for temperature sensors
                 foreach (var sensor in hardwareItem.Sensors)
                 {
-                    if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+                    switch (sensor.SensorType)
                     {
-                        Console.WriteLine($"  Temperature Sensor: {sensor.Name}, Value: {sensor.Value} °C");
-                        temperatureSensorFound = true;
+                        case SensorType.Temperature:
+                            temperature = sensor.Value;
+                            Console.WriteLine($"  Temperature Sensor: {sensor.Name}, Value: {sensor.Value} °C");
+                            break;
+                        case SensorType.Load:
+                            usage = sensor.Value;
+                            Console.WriteLine($"  Load Sensor: {sensor.Name}, Value: {sensor.Value} %");
+                            break;
+                        case SensorType.Power:
+                            power = sensor.Value;
+                            Console.WriteLine($"  Power Sensor: {sensor.Name}, Value: {sensor.Value} W");
+                            break;
+                        case SensorType.Clock:
+                            coreSpeed = sensor.Value;
+                            Console.WriteLine($"  Clock Speed Sensor: {sensor.Name}, Value: {sensor.Value} MHz");
+                            break;
+                        default:
+                            Console.WriteLine($"  Sensor: {sensor.Name}, Value: {sensor.Value}");
+                            break;
                     }
                 }
-
-                // Check for load sensors
-                foreach (var sensor in hardwareItem.Sensors)
-                {
-                    if (sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
-                    {
-                        Console.WriteLine($"  Load Sensor: {sensor.Name}, Value: {sensor.Value} %");
-                    }
-                }
-
-                // Check for power sensors
-                foreach (var sensor in hardwareItem.Sensors)
-                {
-                    if (sensor.SensorType == SensorType.Power && sensor.Value.HasValue)
-                    {
-                        Console.WriteLine($"  Power Sensor: {sensor.Name}, Value: {sensor.Value} W");
-                        powerSensorFound = true;
-                    }
-                }
-
-                // Check for clock speed sensors
-                foreach (var sensor in hardwareItem.Sensors)
-                {
-                    if (sensor.SensorType == SensorType.Clock && sensor.Value.HasValue)
-                    {
-                        Console.WriteLine($"  Clock Speed Sensor: {sensor.Name}, Value: {sensor.Value} MHz");
-                        clockSpeedSensorFound = true;
-                    }
-                }
-            }
-
-            if (!temperatureSensorFound)
-            {
-                Console.WriteLine("  No temperature sensors found.");
-            }
-
-            if (!powerSensorFound)
-            {
-                Console.WriteLine("  No power sensors found.");
-            }
-
-            if (!clockSpeedSensorFound)
-            {
-                Console.WriteLine("  No clock speed sensors found.");
             }
 
             // Get and display CPU usage
@@ -126,6 +101,7 @@ namespace OpenHardwareMonitorExample
             System.Threading.Thread.Sleep(100); // Wait for the counter to get a valid value
             cpuUsage = cpuCounter.NextValue(); // Get the updated CPU usage
             Console.WriteLine($"\nCPU Usage: {cpuUsage:F2} %");
+            DatabaseHelper.InsertMetrics(temperature, usage, power, coreSpeed, memorySpeed);
 
             // List all running processes
             Console.WriteLine("\nRunning Processes:");
