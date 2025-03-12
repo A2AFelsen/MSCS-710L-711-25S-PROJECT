@@ -1,175 +1,165 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Management; // Add reference to System.Management
+using System.Management;
 using System.Security.Principal;
 using System.Timers;
 using OpenHardwareMonitor.Hardware;
 
-namespace OpenHardwareMonitorExample
+namespace OpenHardwareMonitor
 {
     class Program
     {
         private static Computer computer;
-        private static PerformanceCounter cpuCounter; // Performance counter for overall CPU usage
+        private static PerformanceCounter cpuCounter;
 
         static void Main(string[] args)
         {
-            // Check if the program is running as administrator
             if (!IsRunningAsAdministrator())
             {
-                // Relaunch the program as administrator
                 RelaunchAsAdministrator();
                 return;
             }
 
-            // Initialize the Computer object
             computer = new Computer
             {
                 CPUEnabled = true,
                 GPUEnabled = true,
                 RAMEnabled = true,
                 FanControllerEnabled = true,
-                HDDEnabled = true
+                HDDEnabled = true,
+                MainboardEnabled = true
             };
 
-            // Open the hardware monitoring session
             computer.Open();
-
-            // Initialize the CPU performance counter
             cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
-            // Set up a timer to run every 30 seconds
-            Timer timer = new Timer(30000); // 30,000 milliseconds = 30 seconds
-            timer.Elapsed += OnTimedEvent; // Attach the event handler
-            timer.AutoReset = true; // Ensure the timer repeats
-            timer.Enabled = true; // Start the timer
+            Timer timer = new Timer(30000);
+            timer.Elapsed += OnTimedEvent;
+            timer.AutoReset = true;
+            timer.Enabled = true;
 
             Console.WriteLine("Press Enter to exit the program.");
             Console.ReadLine();
 
-            // Clean up
             timer.Stop();
             computer.Close();
-            DatabaseHelper.CloseConnection();
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            Console.WriteLine($"Reading sensor data at {DateTime.Now}");
+            DateTime timestamp = DateTime.Now;
+            Console.WriteLine($"Reading sensor data at {timestamp}");
 
-            float? temperature = null;
-            float? power = null;
-            float? usage = null;
-            float? coreSpeed = null;
-            float? memorySpeed = null;
-
-            // Read and display hardware sensor data
+            // Collect data for component_statistic and component tables
             foreach (var hardwareItem in computer.Hardware)
             {
-                Console.WriteLine($"Hardware: {hardwareItem.Name}");
                 hardwareItem.Update();
+
+                string serialNumber = GetHardwareSerialNumber(hardwareItem);
+                string deviceType = hardwareItem.HardwareType.ToString();
+                float temperature = 0;
+                float powerConsumption = 0;
+                float coreSpeed = 0;
+                float memorySpeed = 0;
+                int vRam = 0;
+                float stockCoreSpeed = 0;
+                float stockMemorySpeed = 0;
 
                 foreach (var sensor in hardwareItem.Sensors)
                 {
-                    switch (sensor.SensorType)
+                    if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
                     {
-                        case SensorType.Temperature:
-                            temperature = sensor.Value;
-                            Console.WriteLine($"  Temperature Sensor: {sensor.Name}, Value: {sensor.Value} °C");
-                            break;
-                        case SensorType.Load:
-                            usage = sensor.Value;
-                            Console.WriteLine($"  Load Sensor: {sensor.Name}, Value: {sensor.Value} %");
-                            break;
-                        case SensorType.Power:
-                            power = sensor.Value;
-                            Console.WriteLine($"  Power Sensor: {sensor.Name}, Value: {sensor.Value} W");
-                            break;
-                        case SensorType.Clock:
-                            coreSpeed = sensor.Value;
-                            Console.WriteLine($"  Clock Speed Sensor: {sensor.Name}, Value: {sensor.Value} MHz");
-                            break;
-                        default:
-                            Console.WriteLine($"  Sensor: {sensor.Name}, Value: {sensor.Value}");
-                            break;
+                        temperature = sensor.Value.Value;
+                    }
+                    else if (sensor.SensorType == SensorType.Power && sensor.Value.HasValue)
+                    {
+                        powerConsumption = sensor.Value.Value;
+                    }
+                    else if (sensor.SensorType == SensorType.Clock && sensor.Value.HasValue)
+                    {
+                        if (hardwareItem.HardwareType == HardwareType.CPU)
+                        {
+                            coreSpeed = sensor.Value.Value;
+                        }
+                        else if (hardwareItem.HardwareType == HardwareType.GpuNvidia || hardwareItem.HardwareType == HardwareType.GpuAti)
+                        {
+                            memorySpeed = sensor.Value.Value;
+                        }
+                    }
+                    else if (sensor.SensorType == SensorType.Data && sensor.Value.HasValue)
+                    {
+                        if (sensor.Name.Contains("GPU Memory"))
+                        {
+                            vRam = (int)sensor.Value.Value;
+                        }
                     }
                 }
+
+                // Print or store component_statistic data
+                Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, CPUUsage={cpuCounter.NextValue()}, PowerConsumption={powerConsumption}, CoreSpeed={coreSpeed}, MemorySpeed={memorySpeed}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
+
+                // Print or store component data
+                Console.WriteLine($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
             }
 
-            // Get and display CPU usage
-            float cpuUsage = cpuCounter.NextValue(); // Get the current CPU usage
-            System.Threading.Thread.Sleep(100); // Wait for the counter to get a valid value
-            cpuUsage = cpuCounter.NextValue(); // Get the updated CPU usage
-            Console.WriteLine($"\nCPU Usage: {cpuUsage:F2} %");
-            DatabaseHelper.InsertMetrics(temperature, usage, power, coreSpeed, memorySpeed);
-
-            // List all running processes
-            Console.WriteLine("\nRunning Processes:");
+            // Collect data for process table
             Process[] processes = Process.GetProcesses();
             foreach (Process process in processes)
             {
                 try
                 {
-                    Console.WriteLine($"  Process: {process.ProcessName} (ID: {process.Id})");
+                    int pid = process.Id;
+                    float processCpuUsage = cpuCounter.NextValue();
+                    float memoryUsage = process.WorkingSet64 / 1024f / 1024f; // Convert to MB
+                    DateTime processEndOfLife = timestamp.AddYears(1);
+
+                    // Print or store process data
+                    Console.WriteLine($"Process: PID={pid}, Timestamp={timestamp}, CPUUsage={processCpuUsage}, MemoryUsage={memoryUsage}, EndOfLife={processEndOfLife}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"  Error accessing process {process.ProcessName}: {ex.Message}");
+                    Console.WriteLine($"Error accessing process {process.ProcessName}: {ex.Message}");
                 }
             }
-
-            // Retrieve and display hardware serial numbers using WMI
-            Console.WriteLine("\nHardware Serial Numbers:");
-            GetHardwareSerialNumbers();
-
-            // Retrieve and display RAM information
-            Console.WriteLine("\nRAM Information:");
-            GetRAMInformation();
-
-            Console.WriteLine(); // Add a blank line for readability
         }
 
-        private static void GetHardwareSerialNumbers()
+        private static string GetHardwareSerialNumber(IHardware hardware)
         {
-            // Get CPU Serial Number
-            string cpuSerialNumber = GetWMISerialNumber("Win32_Processor", "ProcessorId");
-            Console.WriteLine($"  CPU Serial Number: {cpuSerialNumber}");
-
-            // Get Motherboard Serial Number
-            string motherboardSerialNumber = GetWMISerialNumber("Win32_BaseBoard", "SerialNumber");
-            Console.WriteLine($"  Motherboard Serial Number: {motherboardSerialNumber}");
-
-            // Get GPU Serial Number (if available)
-            string gpuSerialNumber = GetWMISerialNumber("Win32_VideoController", "PNPDeviceID");
-            Console.WriteLine($"  GPU Serial Number: {gpuSerialNumber}");
+            switch (hardware.HardwareType)
+            {
+                case HardwareType.CPU:
+                    return GetWMISerialNumber("Win32_Processor", "ProcessorId");
+                case HardwareType.GpuNvidia:
+                case HardwareType.GpuAti:
+                    return GetWMISerialNumber("Win32_VideoController", "PNPDeviceID");
+                case HardwareType.RAM:
+                    return GetWMISerialNumber("Win32_PhysicalMemory", "SerialNumber");
+                case HardwareType.Mainboard:
+                    return GetWMISerialNumber("Win32_BaseBoard", "SerialNumber");
+                case HardwareType.HDD:
+                    return GetWMISerialNumber("Win32_DiskDrive", "SerialNumber");
+                default:
+                    return "Not Available";
+            }
         }
 
-        private static void GetRAMInformation()
+        private static float GetTotalRAM()
         {
+            float totalRam = 0;
             try
             {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem");
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
                 foreach (ManagementObject obj in searcher.Get())
                 {
-                    // Total physical memory in kilobytes (KB)
                     ulong totalMemoryKB = Convert.ToUInt64(obj["TotalVisibleMemorySize"]);
-                    // Free physical memory in kilobytes (KB)
-                    ulong freeMemoryKB = Convert.ToUInt64(obj["FreePhysicalMemory"]);
-
-                    // Convert KB to GB
-                    double totalMemoryGB = totalMemoryKB / 1048576.0;
-                    double freeMemoryGB = freeMemoryKB / 1048576.0;
-                    double usedMemoryGB = totalMemoryGB - freeMemoryGB;
-
-                    Console.WriteLine($"  Total RAM: {totalMemoryGB:F2} GB");
-                    Console.WriteLine($"  Used RAM: {usedMemoryGB:F2} GB");
-                    Console.WriteLine($"  Available RAM: {freeMemoryGB:F2} GB");
+                    totalRam = totalMemoryKB / 1024f / 1024f; // Convert KB to GB
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"  Error retrieving RAM information: {ex.Message}");
+                Console.WriteLine($"Error retrieving RAM information: {ex.Message}");
             }
+            return totalRam;
         }
 
         private static string GetWMISerialNumber(string wmiClass, string propertyName)
@@ -184,7 +174,7 @@ namespace OpenHardwareMonitorExample
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"  Error retrieving {wmiClass} serial number: {ex.Message}");
+                Console.WriteLine($"Error retrieving {wmiClass} serial number: {ex.Message}");
             }
             return "Not Available";
         }
@@ -201,7 +191,7 @@ namespace OpenHardwareMonitorExample
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
             procInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
-            procInfo.Verb = "runas"; // This triggers the UAC prompt
+            procInfo.Verb = "runas";
 
             try
             {
@@ -209,11 +199,10 @@ namespace OpenHardwareMonitorExample
             }
             catch (System.ComponentModel.Win32Exception)
             {
-                // The user declined the UAC prompt
                 Console.WriteLine("You must run this program as an administrator.");
             }
 
-            Environment.Exit(0); // Close the current instance
+            Environment.Exit(0);
         }
     }
 }
