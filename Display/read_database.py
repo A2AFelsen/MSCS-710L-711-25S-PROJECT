@@ -1,6 +1,6 @@
 ###########################################################################################
-# File: database.py                                                                       #
-# Purpose: Overall database manager for metrics the gathering.                            #
+# File: read_database.py                                                                  #
+# Purpose: Read metrics from the database                                                 #
 #                                                                                         #
 # v0.0.1 Initial version. Mostly a skeleton.                                              #
 ###########################################################################################
@@ -23,16 +23,6 @@ def check_db(db):
     conn.close()
 
 
-# Read the metrics json file.
-def read_metrics_json(json_file):
-    pass
-
-
-# Insert gathered metrics into a specified table.
-def insert_metrics(db, table, data):
-    pass
-
-
-# Check the sql before actually passing it on.
-def check_sql(in_sql):
-    pass
+# Read the Metrics from the database
+def read_metrics(db):
+    return
