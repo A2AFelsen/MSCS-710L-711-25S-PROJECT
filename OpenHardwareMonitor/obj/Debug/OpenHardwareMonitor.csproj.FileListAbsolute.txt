@@ -7,3 +7,12 @@ C:\Users\zackz\source\repos\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.cs
 C:\Users\zackz\source\repos\OpenHardwareMonitor\obj\Debug\OpenHard.4B9A315C.Up2Date
 C:\Users\zackz\source\repos\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.exe
 C:\Users\zackz\source\repos\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.pdb
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\bin\Debug\OpenHardwareMonitor.exe.config
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\bin\Debug\OpenHardwareMonitor.exe
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\bin\Debug\OpenHardwareMonitor.pdb
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\bin\Debug\OpenHardwareMonitorLib.dll
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.csproj.AssemblyReference.cache
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.csproj.CoreCompileInputs.cache
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\obj\Debug\OpenHard.4B9A315C.Up2Date
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.exe
+C:\Users\zackz\GitHub\MSCS-710L-711-25S-PROJECT\OpenHardwareMonitor\obj\Debug\OpenHardwareMonitor.pdb

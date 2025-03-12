@@ -125,22 +125,37 @@ namespace OpenHardwareMonitor
 
         private static string GetHardwareSerialNumber(IHardware hardware)
         {
+            string serialNumber;
             switch (hardware.HardwareType)
             {
                 case HardwareType.CPU:
-                    return GetWMISerialNumber("Win32_Processor", "ProcessorId");
+                    serialNumber = GetWMISerialNumber("Win32_Processor", "ProcessorId");
+                    break;
                 case HardwareType.GpuNvidia:
                 case HardwareType.GpuAti:
-                    return GetWMISerialNumber("Win32_VideoController", "PNPDeviceID");
+                    serialNumber = GetWMISerialNumber("Win32_VideoController", "PNPDeviceID");
+                    break;
                 case HardwareType.RAM:
-                    return GetWMISerialNumber("Win32_PhysicalMemory", "SerialNumber");
+                    serialNumber = GetWMISerialNumber("Win32_PhysicalMemory", "SerialNumber");
+                    break;
                 case HardwareType.Mainboard:
-                    return GetWMISerialNumber("Win32_BaseBoard", "SerialNumber");
+                    serialNumber = GetWMISerialNumber("Win32_BaseBoard", "SerialNumber");
+                    break;
                 case HardwareType.HDD:
-                    return GetWMISerialNumber("Win32_DiskDrive", "SerialNumber");
+                    serialNumber = GetWMISerialNumber("Win32_DiskDrive", "SerialNumber");
+                    break;
                 default:
-                    return "Not Available";
+                    serialNumber = "Not Available";
+                    break;
             }
+
+            // If the serial number is not available, generate a placeholder
+            if (serialNumber == "Not Available" || string.IsNullOrWhiteSpace(serialNumber))
+            {
+                serialNumber = $"UNKNOWN-{hardware.HardwareType}-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+            }
+
+            return serialNumber;
         }
 
         private static float GetTotalRAM()
