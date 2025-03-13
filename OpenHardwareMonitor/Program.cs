@@ -14,11 +14,31 @@ namespace OpenHardwareMonitor
 
         static void Main(string[] args)
         {
+            if (args.Length > 0)
+            {
+                if (args[0] == "init-db")
+                {
+                    DatabaseHelper.InitializeDatabase();
+                    Console.WriteLine("Database initialized.");
+                    return;
+                }
+                else if (args[0] == "clear-db")
+                {
+                    DatabaseHelper.InitializeDatabase(); // Ensure the database exists
+                    DatabaseHelper.ClearDatabase();
+                    Console.WriteLine("Database cleared.");
+                    return;
+                }
+            }
+
             if (!IsRunningAsAdministrator())
             {
                 RelaunchAsAdministrator();
                 return;
             }
+
+            // Initialize the database if it doesn't already exist
+            DatabaseHelper.InitializeDatabase();
 
             computer = new Computer
             {
@@ -43,6 +63,7 @@ namespace OpenHardwareMonitor
 
             timer.Stop();
             computer.Close();
+            DatabaseHelper.CloseConnection(); // Close the database connection when the program exits
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
@@ -95,10 +116,24 @@ namespace OpenHardwareMonitor
                     }
                 }
 
-                // Print or store component_statistic data
-                Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, CPUUsage={cpuCounter.NextValue()}, PowerConsumption={powerConsumption}, CoreSpeed={coreSpeed}, MemorySpeed={memorySpeed}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
+                // Insert component data into the database
+                DatabaseHelper.InsertComponent(serialNumber, deviceType, vRam, stockCoreSpeed, stockMemorySpeed);
 
-                // Print or store component data
+                // Insert component_statistic data into the database
+                DatabaseHelper.InsertComponentStatistic(
+                    serialNumber,
+                    timestamp,
+                    "Active", // Machine state (e.g., "Active")
+                    temperature,
+                    cpuCounter.NextValue(), // CPU usage
+                    powerConsumption,
+                    coreSpeed,
+                    memorySpeed,
+                    GetTotalRAM(), // Total RAM in GB
+                    timestamp.AddYears(1) // End of life (1 year from now)
+                );
+
+                Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, CPUUsage={cpuCounter.NextValue()}, PowerConsumption={powerConsumption}, CoreSpeed={coreSpeed}, MemorySpeed={memorySpeed}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
                 Console.WriteLine($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
             }
 
@@ -113,7 +148,7 @@ namespace OpenHardwareMonitor
                     float memoryUsage = process.WorkingSet64 / 1024f / 1024f; // Convert to MB
                     DateTime processEndOfLife = timestamp.AddYears(1);
 
-                    // Print or store process data
+                    DatabaseHelper.InsertProcess(pid, timestamp, processCpuUsage, memoryUsage, processEndOfLife);
                     Console.WriteLine($"Process: PID={pid}, Timestamp={timestamp}, CPUUsage={processCpuUsage}, MemoryUsage={memoryUsage}, EndOfLife={processEndOfLife}");
                 }
                 catch (Exception ex)
