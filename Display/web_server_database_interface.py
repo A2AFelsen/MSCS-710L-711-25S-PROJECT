@@ -26,3 +26,13 @@ def known_data():
         return list_even_first
     else:
         return list_odd_first
+
+
+def random_data():
+    num_entries = random.randint(2, 6)
+    random_list = []
+    i = 0
+    while i < num_entries:
+        random_list.append(random.randint(0, 20))
+        i += 1
+    return random_list

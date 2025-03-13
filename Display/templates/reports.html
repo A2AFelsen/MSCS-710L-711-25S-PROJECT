@@ -31,51 +31,34 @@
 </head>
 <body>
     <div class="quadrant-container">
-        <div class="quadrant" id="quad1">
-            <select class="form-select" onchange="updateChart('chart1', this.value)">
-                <option value="data1">Data Set 1</option>
-                <option value="data2">Data Set 2</option>
+        {% set dataset_keys = datasets.keys() | list %}
+        {% for i in range(4) %}
+        <div class="quadrant" id="quad{{ i + 1 }}">
+            <select class="form-select" id="select{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}', this.value)">
+                {% for dataset_name in dataset_keys %}
+                    <option value="{{ dataset_name }}" {% if loop.index0 == i %}selected{% endif %}>
+                        {{ dataset_name }}
+                    </option>
+                {% endfor %}
             </select>
-            <canvas id="chart1"></canvas>
+            <canvas id="chart{{ i + 1 }}"></canvas>
         </div>
-        <div class="quadrant" id="quad2">
-            <select class="form-select" onchange="updateChart('chart2', this.value)">
-                <option value="data1">Data Set 1</option>
-                <option value="data2">Data Set 2</option>
-            </select>
-            <canvas id="chart2"></canvas>
-        </div>
-        <div class="quadrant" id="quad3">
-            <select class="form-select" onchange="updateChart('chart3', this.value)">
-                <option value="data1">Data Set 1</option>
-                <option value="data2">Data Set 2</option>
-            </select>
-            <canvas id="chart3"></canvas>
-        </div>
-        <div class="quadrant" id="quad4">
-            <select class="form-select" onchange="updateChart('chart4', this.value)">
-                <option value="data1">Data Set 1</option>
-                <option value="data2">Data Set 2</option>
-            </select>
-            <canvas id="chart4"></canvas>
-        </div>
+        {% endfor %}
     </div>
 
     <script>
-        const chartData = {
-            data1: {{ list0 }},
-            data2: {{ list1 }}
-        };
+        // Inject Flask dataset data into JavaScript
+        const chartData = {{ datasets | tojson | safe }};
 
-        function createChart(chartId) {
+        function createChart(chartId, initialDataset) {
             const ctx = document.getElementById(chartId).getContext('2d');
             return new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                     datasets: [{
-                        label: 'Sample Data',
-                        data: chartData.data1,
+                        label: initialDataset,
+                        data: chartData[initialDataset],
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 2,
@@ -89,15 +72,17 @@
             });
         }
 
-        const charts = {
-            chart1: createChart('chart1'),
-            chart2: createChart('chart2'),
-            chart3: createChart('chart3'),
-            chart4: createChart('chart4')
-        };
+        // Create charts for each quadrant with a unique default dataset
+        const charts = {};
+        document.querySelectorAll("canvas").forEach((canvas, index) => {
+            const selectElement = document.getElementById(`select${index + 1}`);
+            const defaultDataset = selectElement.value;
+            charts[canvas.id] = createChart(canvas.id, defaultDataset);
+        });
 
-        function updateChart(chartId, dataKey) {
-            charts[chartId].data.datasets[0].data = chartData[dataKey];
+        function updateChart(chartId, selectedDataset) {
+            charts[chartId].data.datasets[0].data = chartData[selectedDataset];
+            charts[chartId].data.datasets[0].label = selectedDataset;
             charts[chartId].update();
         }
     </script>

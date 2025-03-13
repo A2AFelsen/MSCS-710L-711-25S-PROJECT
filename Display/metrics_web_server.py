@@ -10,7 +10,7 @@
 
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, emit
-from web_server_database_interface import known_data
+from web_server_database_interface import known_data, random_data
 
 
 # Set up the Flask instance as well as the socket IO
@@ -26,10 +26,14 @@ def index():
 
 @app.route('/user_report', methods=['POST'])
 def user_report():
-    list0 = known_data()
-    list1 = known_data()
-    known_data()
-    return render_template('reports.html', list0=list0, list1=list1)
+    datasets = {
+        "GPU0": random_data(),
+        "GPU1": random_data(),
+        "DIMM": random_data(),
+        "CPU": random_data(),
+        "Power Supply": random_data()
+    }
+    return render_template('reports.html', datasets=datasets)
 
 
 if __name__ == '__main__':
