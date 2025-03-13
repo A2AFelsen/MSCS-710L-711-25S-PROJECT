@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadrant Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .quadrant-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+        .quadrant {
+            border: 1px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas {
+            width: 100% !important;
+            height: 250px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="quadrant-container">
+        <div class="quadrant" id="quad1">
+            <select class="form-select" onchange="updateChart('chart1', this.value)">
+                <option value="data1">Data Set 1</option>
+                <option value="data2">Data Set 2</option>
+            </select>
+            <canvas id="chart1"></canvas>
+        </div>
+        <div class="quadrant" id="quad2">
+            <select class="form-select" onchange="updateChart('chart2', this.value)">
+                <option value="data1">Data Set 1</option>
+                <option value="data2">Data Set 2</option>
+            </select>
+            <canvas id="chart2"></canvas>
+        </div>
+        <div class="quadrant" id="quad3">
+            <select class="form-select" onchange="updateChart('chart3', this.value)">
+                <option value="data1">Data Set 1</option>
+                <option value="data2">Data Set 2</option>
+            </select>
+            <canvas id="chart3"></canvas>
+        </div>
+        <div class="quadrant" id="quad4">
+            <select class="form-select" onchange="updateChart('chart4', this.value)">
+                <option value="data1">Data Set 1</option>
+                <option value="data2">Data Set 2</option>
+            </select>
+            <canvas id="chart4"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const chartData = {
+            data1: {{ list0 }},
+            data2: {{ list1 }}
+        };
+
+        function createChart(chartId) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Sample Data',
+                        data: chartData.data1,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        const charts = {
+            chart1: createChart('chart1'),
+            chart2: createChart('chart2'),
+            chart3: createChart('chart3'),
+            chart4: createChart('chart4')
+        };
+
+        function updateChart(chartId, dataKey) {
+            charts[chartId].data.datasets[0].data = chartData[dataKey];
+            charts[chartId].update();
+        }
+    </script>
+</body>
+</html>

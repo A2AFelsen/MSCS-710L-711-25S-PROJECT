@@ -3,12 +3,14 @@
 # Purpose: Set up the web server that will be run locally on the users pc.                #
 #                                                                                         #
 # v0.0.1 Initial version. Mostly a skeleton.                                              #
+# v0.1.0 Can now pull data from the interface script and pass it to the user_report page  #
 ###########################################################################################
 # TODO:                                                                                   #
 ###########################################################################################
 
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, emit
+from web_server_database_interface import known_data
 
 
 # Set up the Flask instance as well as the socket IO
@@ -20,6 +22,14 @@ socketio = SocketIO(app)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/user_report', methods=['POST'])
+def user_report():
+    list0 = known_data()
+    list1 = known_data()
+    known_data()
+    return render_template('reports.html', list0=list0, list1=list1)
 
 
 if __name__ == '__main__':
