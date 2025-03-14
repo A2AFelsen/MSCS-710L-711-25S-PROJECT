@@ -29,7 +29,7 @@ def known_data():
 
 
 def random_data():
-    random_list = [random.randint(1, 100) for _ in range(20)]
+    random_list = [random.randint(1, 100) for _ in range(random.randint(5, 20))]
     return random_list
 
 
