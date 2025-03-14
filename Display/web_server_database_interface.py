@@ -29,10 +29,5 @@ def known_data():
 
 
 def random_data():
-    num_entries = random.randint(2, 6)
-    random_list = []
-    i = 0
-    while i < num_entries:
-        random_list.append(random.randint(0, 20))
-        i += 1
+    random_list = [random.randint(1, 100) for _ in range(20)]
     return random_list
