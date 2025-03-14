@@ -31,3 +31,15 @@ def known_data():
 def random_data():
     random_list = [random.randint(1, 100) for _ in range(20)]
     return random_list
+
+
+def generate_datasets():
+    datasets = {
+        "GPU0": random_data(),
+        "GPU1": random_data(),
+        "DIMM": random_data(),
+        "CPU": random_data(),
+        "Power Supply": random_data()
+    }
+
+    return datasets

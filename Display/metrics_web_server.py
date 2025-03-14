@@ -10,7 +10,7 @@
 
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, emit
-from web_server_database_interface import known_data, random_data
+from web_server_database_interface import generate_datasets
 
 
 # Set up the Flask instance as well as the socket IO
@@ -31,13 +31,7 @@ def gather_report():
 
 @app.route('/user_report', methods=['POST'])
 def user_report():
-    datasets = {
-        "GPU0": random_data(),
-        "GPU1": random_data(),
-        "DIMM": random_data(),
-        "CPU": random_data(),
-        "Power Supply": random_data()
-    }
+    datasets = generate_datasets()
     return render_template('reports.html', datasets=datasets)
 
 
