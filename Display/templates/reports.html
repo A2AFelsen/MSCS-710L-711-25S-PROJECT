@@ -50,15 +50,20 @@
         // Inject Flask dataset data into JavaScript
         const chartData = {{ datasets | tojson | safe }};
 
+        function generateLabels(dataLength) {
+            return Array.from({ length: dataLength }, (_, i) => `Point ${i + 1}`);
+        }
+
         function createChart(chartId, initialDataset) {
             const ctx = document.getElementById(chartId).getContext('2d');
+            const dataPoints = chartData[initialDataset];
             return new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    labels: generateLabels(dataPoints.length), // Labels match dataset length
                     datasets: [{
                         label: initialDataset,
-                        data: chartData[initialDataset],
+                        data: dataPoints,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 2,
@@ -81,7 +86,9 @@
         });
 
         function updateChart(chartId, selectedDataset) {
-            charts[chartId].data.datasets[0].data = chartData[selectedDataset];
+            const dataPoints = chartData[selectedDataset];
+            charts[chartId].data.labels = generateLabels(dataPoints.length); // Update labels
+            charts[chartId].data.datasets[0].data = dataPoints;
             charts[chartId].data.datasets[0].label = selectedDataset;
             charts[chartId].update();
         }
