@@ -32,6 +32,9 @@
 <body>
 
     <button class="return-button" onclick="window.location.href='/'">Return</button>
+    <form action="/user_report" method="post" style="display:inline;">
+        <button>Reload</button>
+    </form>
 
     <div class="quadrant-container">
         {% set dataset_keys = datasets.keys() | list %}

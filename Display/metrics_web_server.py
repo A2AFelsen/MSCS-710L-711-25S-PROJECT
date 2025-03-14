@@ -24,6 +24,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/gather', methods=['POST'])
+def gather_report():
+    return render_template('gather.html')
+
+
 @app.route('/user_report', methods=['POST'])
 def user_report():
     datasets = {
