@@ -1,11 +1,21 @@
+# Ignore Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
 # Ignore build artifacts
-/bin/
-/obj/
-/build/
-/dist/
-/out/
+bin/
+obj/
+*.exe
 *.pdb
 *.dll
+*.config
+*.cache
+*.txt
+*.sys
+*.xml
 
 # Ignore local development files
 *.suo
