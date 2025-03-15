@@ -24,4 +24,4 @@ After cloning the repo and opening the .sln file, Visual Studio sometimes automa
   1. Right-click on the solution in Solution Explorer, e.g. "Solution 'OpenHardwareMonitor' (1 of 1 project)"
   2. Select 'Restore NuGet Packages'
 
-Upon running the program the SQLite db, 'metrics.db' will be created in the same directory as the OpenHardwareMonitor.exe, OpenHardwareMonitor/bin/dDebug
+Upon running the program the SQLite db, 'metrics.db' will be created in the same directory as the OpenHardwareMonitor.exe, OpenHardwareMonitor/bin/Debug
