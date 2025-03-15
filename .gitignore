@@ -15,6 +15,7 @@ obj/
 *.dll
 *.config
 !packages.config
+!App.config
 *.cache
 *.txt
 *.sys
