@@ -12,7 +12,7 @@ bin/
 obj/
 *.exe
 *.pdb
-*.dll
+#*.dll
 *.config
 !packages.config
 !App.config
