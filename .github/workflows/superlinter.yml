@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint code base
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Super-Linter
+        uses: github/super-linter@v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-test:
+    name: Build and Test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '4.8'
+
+      - name: Restore NuGet packages
+        run: nuget restore
+
+      - name: Build the project
+        run: msbuild OpenHardwareMonitor.sln /p:Configuration=Release
+
+      - name: Run tests
+        run: dotnet test --no-build --configuration Release
+
+      - name: Publish build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: bin/Release
