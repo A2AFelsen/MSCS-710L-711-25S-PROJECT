@@ -1,0 +1,68 @@
+# Ignore build artifacts
+/bin/
+/obj/
+/build/
+/dist/
+/out/
+*.pdb
+*.dll
+
+# Ignore local development files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py.class
+*.egg-info/
+venv/
+env/
+ENV/
+.env/
+.vscode/
+.idea/
+
+# Ignore log files
+/logs/
+*.log
+
+# Ignore local configuration files
+*.config
+*.local
+*.settings
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Ignore IDE specific files
+.vs/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore NuGet packages
+packages/
+*.nupkg
+
+# Ignore Python packaging files
+*.egg
+*.whl
+
+# Ignore Flask cache
+.flaskenv
+.flask-debug
+
+# Ignore Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
