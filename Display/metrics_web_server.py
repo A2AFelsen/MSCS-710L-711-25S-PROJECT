@@ -11,6 +11,7 @@
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, emit
 from web_server_database_interface import generate_datasets
+import subprocess as sp
 
 
 # Set up the Flask instance as well as the socket IO
@@ -32,7 +33,8 @@ def gather_report():
 @app.route('/user_report', methods=['POST'])
 def user_report():
     datasets = generate_datasets()
-    return render_template('reports.html', datasets=datasets)
+    max_datapoints = max((len(lst) for lst in datasets.values()), default=0)
+    return render_template('reports.html', datasets=datasets, max_datapoints=max_datapoints)
 
 
 if __name__ == '__main__':
