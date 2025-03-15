@@ -4,6 +4,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.csproj.user
+*.csproj.dtbcache.json
 
 # Ignore build artifacts
 bin/
@@ -16,12 +18,38 @@ obj/
 *.txt
 *.sys
 *.xml
+*.Up2Date
+*.log
+*.msi
+*.nupkg
 
-# Ignore local development files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+# Ignore SQLite database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignore NuGet packages
+packages/
+*.nupkg
+
+# Ignore IDE-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore temporary files
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Ignore Windows-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # Ignore Python cache and virtual environments
 __pycache__/
@@ -34,45 +62,12 @@ venv/
 env/
 ENV/
 .env/
-.vscode/
-.idea/
-
-# Ignore log files
-/logs/
-*.log
-
-# Ignore local configuration files
-*.config
-*.local
-*.settings
-
-# Ignore temporary files
-*.tmp
-*.temp
-*.bak
-*.swp
-*.swo
-
-# Ignore IDE specific files
-.vs/
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Ignore NuGet packages
-packages/
-*.nupkg
-
-# Ignore Python packaging files
-*.egg
-*.whl
 
 # Ignore Flask cache
 .flaskenv
 .flask-debug
 
-# Ignore Windows specific files
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# Ignore EntityFramework and SQLite-related files
+EntityFramework.*
+System.Data.SQLite.*
+Stub.System.Data.SQLite.Core.NetFramework.*
