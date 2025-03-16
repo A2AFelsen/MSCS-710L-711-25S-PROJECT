@@ -16,7 +16,7 @@ namespace OpenHardwareMonitor
             // Create component table
             string createComponentTableQuery = @"
                 CREATE TABLE IF NOT EXISTS component (
-                    serial_number INTEGER PRIMARY KEY,
+                    serial_number VARCHAR(128) PRIMARY KEY,
                     device_type TEXT NOT NULL,
                     v_ram INTEGER,
                     stock_core_speed REAL,
@@ -27,7 +27,7 @@ namespace OpenHardwareMonitor
             // Create component_statistic table
             string createComponentStatisticTableQuery = @"
                 CREATE TABLE IF NOT EXISTS component_statistic (
-                    serial_number INTEGER,
+                    serial_number VARCHAR(128),
                     timestamp DATETIME,
                     machine_state TEXT NOT NULL,
                     temperature REAL,
