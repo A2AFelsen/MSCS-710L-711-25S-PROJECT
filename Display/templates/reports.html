@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quadrant Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         .quadrant-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            height: 100vh;
-            gap: 10px;
-            padding: 10px;
+            grid-template-columns: repeat(2, 1fr); /* Creates a 2-column layout */
+            grid-template-rows: repeat(2, 1fr); /* Ensures 2 rows */
+            gap: 15px;
+            padding: 20px;
+            height: 100vh; /* Ensures it takes the full viewport height */
         }
+
         .quadrant {
             border: 1px solid #ccc;
             padding: 20px;
@@ -22,11 +22,22 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-width: 300px;
+            max-width: 100%;
         }
+
         canvas {
-            width: 100% !important;
-            height: 250px !important;
+            width: auto !important;
+            height: auto !important;
+            max-height: 300px;
         }
+
+        select.form-select {
+            font-size: 16px;
+            width: 90%;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -34,6 +45,21 @@
     <button class="return-button" onclick="window.location.href='/'">Return</button>
     <form action="/user_report" method="post" style="display:inline;">
         <button>Reload</button>
+    </form>
+
+    <form>
+        <label for="num1">Start Date:</label>
+        <select name="num1" id="num1">
+            {% for i in range(max_datapoints + 1 ) %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+        <label for="num2">End Date:</label>
+        <select name="num2" id="num2">
+            {% for i in range(max_datapoints + 1) %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
     </form>
 
     <div class="quadrant-container">
@@ -52,52 +78,78 @@
         {% endfor %}
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        // Inject Flask dataset data into JavaScript
-        const chartData = {{ datasets | tojson | safe }};
+    // Inject Flask dataset data into JavaScript
+    const chartData = {{ datasets | tojson | safe }};
 
-        function generateLabels(dataLength) {
-            return Array.from({ length: dataLength }, (_, i) => `Point ${i + 1}`);
-        }
+    function generateLabels(start, end) {
+        return Array.from({ length: end - start + 1 }, (_, i) => `Point ${start + i}`);
+    }
 
-        function createChart(chartId, initialDataset) {
-            const ctx = document.getElementById(chartId).getContext('2d');
-            const dataPoints = chartData[initialDataset];
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: generateLabels(dataPoints.length), // Labels match dataset length
-                    datasets: [{
-                        label: initialDataset,
-                        data: dataPoints,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        // Create charts for each quadrant with a unique default dataset
-        const charts = {};
-        document.querySelectorAll("canvas").forEach((canvas, index) => {
-            const selectElement = document.getElementById(`select${index + 1}`);
-            const defaultDataset = selectElement.value;
-            charts[canvas.id] = createChart(canvas.id, defaultDataset);
+    function createChart(chartId, initialDataset, start = 0, end = chartData[initialDataset].length - 1) {
+        const ctx = document.getElementById(chartId).getContext('2d');
+        const dataPoints = chartData[initialDataset].slice(start, end + 1); // Filter based on num1 & num2
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: generateLabels(start, end),
+                datasets: [{
+                    label: initialDataset,
+                    data: dataPoints,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
         });
+    }
 
-        function updateChart(chartId, selectedDataset) {
-            const dataPoints = chartData[selectedDataset];
-            charts[chartId].data.labels = generateLabels(dataPoints.length); // Update labels
-            charts[chartId].data.datasets[0].data = dataPoints;
-            charts[chartId].data.datasets[0].label = selectedDataset;
-            charts[chartId].update();
+    // Create charts for each quadrant with a unique default dataset
+    const charts = {};
+    document.querySelectorAll("canvas").forEach((canvas, index) => {
+        const selectElement = document.getElementById(`select${index + 1}`);
+        const defaultDataset = selectElement.value;
+        charts[canvas.id] = createChart(canvas.id, defaultDataset);
+    });
+
+    function updateChart(chartId, selectedDataset) {
+        const num1 = parseInt(document.getElementById("num1").value);
+        const num2 = parseInt(document.getElementById("num2").value);
+
+        if (num1 > num2) {
+            alert("Start date must be less than or equal to end date.");
+            return;
         }
+
+        const dataPoints = chartData[selectedDataset].slice(num1, num2 + 1);
+        charts[chartId].data.labels = generateLabels(num1, num2);
+        charts[chartId].data.datasets[0].data = dataPoints;
+        charts[chartId].data.datasets[0].label = selectedDataset;
+        charts[chartId].update();
+    }
+
+    // Listen for changes in num1 and num2
+    document.getElementById("num1").addEventListener("change", () => {
+        Object.keys(charts).forEach(chartId => {
+            const selectElement = document.getElementById(`select${chartId.replace('chart', '')}`);
+            updateChart(chartId, selectElement.value);
+        });
+    });
+
+    document.getElementById("num2").addEventListener("change", () => {
+        Object.keys(charts).forEach(chartId => {
+            const selectElement = document.getElementById(`select${chartId.replace('chart', '')}`);
+            updateChart(chartId, selectElement.value);
+        });
+    });
     </script>
+
 </body>
 </html>
