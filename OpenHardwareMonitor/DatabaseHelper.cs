@@ -55,6 +55,17 @@ namespace OpenHardwareMonitor
             ExecuteNonQuery(createProcessTableQuery);
         }
 
+        public static bool ComponentExists(string serialNumber)
+        {
+            string query = "SELECT COUNT(*) FROM component WHERE serial_number = @serialNumber;";
+            using (var command = new SQLiteCommand(query, dbConnection))
+            {
+                command.Parameters.AddWithValue("@serialNumber", serialNumber);
+                int count = Convert.ToInt32(command.ExecuteScalar());
+                return count > 0;
+            }
+        }
+
         public static void InsertComponent(string serialNumber, string deviceType, int? vRam, float? stockCoreSpeed, float? stockMemorySpeed)
         {
             string insertQuery = @"

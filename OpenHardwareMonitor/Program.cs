@@ -53,7 +53,7 @@ namespace OpenHardwareMonitor
             computer.Open();
             cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
-            Timer timer = new Timer(30000);
+            Timer timer = new Timer(30000); // 30-second interval
             timer.Elapsed += OnTimedEvent;
             timer.AutoReset = true;
             timer.Enabled = true;
@@ -90,6 +90,7 @@ namespace OpenHardwareMonitor
                 {
                     if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
                     {
+                        Console.WriteLine($"  Temperature Sensor Found: {sensor.Name}, Value: {temperature}");
                         temperature = sensor.Value.Value;
                     }
                     else if (sensor.SensorType == SensorType.Power && sensor.Value.HasValue)
@@ -116,12 +117,16 @@ namespace OpenHardwareMonitor
                     }
                 }
 
-                // Insert component data into the database
-                DatabaseHelper.InsertComponent(serialNumber, deviceType, vRam, stockCoreSpeed, stockMemorySpeed);
+                // Check if the component already exists in the database
+                if (!DatabaseHelper.ComponentExists(serialNumber))
+                {
+                    // Insert component data into the database if it doesn't exist
+                    DatabaseHelper.InsertComponent(serialNumber, deviceType, vRam, stockCoreSpeed, stockMemorySpeed);
+                }
 
                 // Insert component_statistic data into the database
                 DatabaseHelper.InsertComponentStatistic(
-                    serialNumber,
+                    serialNumber, // Use the same serial number for consistency
                     timestamp,
                     "Active", // Machine state (e.g., "Active")
                     temperature,
@@ -184,13 +189,26 @@ namespace OpenHardwareMonitor
                     break;
             }
 
-            // If the serial number is not available, generate a placeholder
+            // If the serial number is not available, generate a deterministic identifier
             if (serialNumber == "Not Available" || string.IsNullOrWhiteSpace(serialNumber))
             {
-                serialNumber = $"UNKNOWN-{hardware.HardwareType}-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+                serialNumber = GenerateDeterministicSerialNumber(hardware);
             }
 
             return serialNumber;
+        }
+
+        private static string GenerateDeterministicSerialNumber(IHardware hardware)
+        {
+            // Use a combination of hardware properties to create a consistent identifier
+            string identifier = $"{hardware.HardwareType}-{hardware.Name}";
+
+            // Hash the identifier to ensure it's a consistent length and format
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(identifier));
+                return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 16); // Use first 16 chars of hash
+            }
         }
 
         private static float GetTotalRAM()
