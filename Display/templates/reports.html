@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quadrant Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         .quadrant-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Creates a 2-column layout */
-            grid-template-rows: repeat(2, 1fr); /* Ensures 2 rows */
+            grid-template-columns: repeat(2, 1fr); /* 2-column layout */
+            grid-template-rows: repeat(2, 1fr); /* 2 rows */
             gap: 15px;
             padding: 20px;
-            height: 100vh; /* Ensures it takes the full viewport height */
+            height: 100vh;
         }
 
         .quadrant {
@@ -47,6 +48,7 @@
         <button>Reload</button>
     </form>
 
+    <!-- Dropdowns for Selecting Start and End Date -->
     <form>
         <label for="num1">Start Date:</label>
         <select name="num1" id="num1">
@@ -54,10 +56,11 @@
                 <option value="{{ i }}">{{ i }}</option>
             {% endfor %}
         </select>
+
         <label for="num2">End Date:</label>
         <select name="num2" id="num2">
             {% for i in range(max_datapoints + 1) %}
-                <option value="{{ i }}">{{ i }}</option>
+                <option value="{{ i }}" {% if i == max_datapoints %}selected{% endif %}>{{ i }}</option>
             {% endfor %}
         </select>
     </form>
@@ -66,90 +69,93 @@
         {% set dataset_keys = datasets.keys() | list %}
         {% for i in range(4) %}
         <div class="quadrant" id="quad{{ i + 1 }}">
-            <select class="form-select" id="select{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}', this.value)">
+            <!-- Dropdown to Select Dataset -->
+            <select class="form-select dataset-select" id="select-dataset{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}')">
                 {% for dataset_name in dataset_keys %}
-                    <option value="{{ dataset_name }}" {% if loop.index0 == i %}selected{% endif %}>
+                    <option value="{{ dataset_name }}" >
                         {{ dataset_name }}
                     </option>
                 {% endfor %}
             </select>
+
+            <!-- Dropdown to Select Column Index -->
+            <select class="form-select column-select" id="select-column{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}')">
+                <option value="1">Column 1</option>
+                <option value="2">Column 2</option>
+                <option value="3">Column 3</option>
+            </select>
+
             <canvas id="chart{{ i + 1 }}"></canvas>
         </div>
         {% endfor %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-    // Inject Flask dataset data into JavaScript
-    const chartData = {{ datasets | tojson | safe }};
+        // Inject Flask dataset data into JavaScript
+        const chartData = {{ datasets | tojson | safe }};
 
-    function generateLabels(start, end) {
-        return Array.from({ length: end - start + 1 }, (_, i) => `Point ${start + i}`);
-    }
-
-    function createChart(chartId, initialDataset, start = 0, end = chartData[initialDataset].length - 1) {
-        const ctx = document.getElementById(chartId).getContext('2d');
-        const dataPoints = chartData[initialDataset].slice(start, end + 1); // Filter based on num1 & num2
-        return new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: generateLabels(start, end),
-                datasets: [{
-                    label: initialDataset,
-                    data: dataPoints,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
-
-    // Create charts for each quadrant with a unique default dataset
-    const charts = {};
-    document.querySelectorAll("canvas").forEach((canvas, index) => {
-        const selectElement = document.getElementById(`select${index + 1}`);
-        const defaultDataset = selectElement.value;
-        charts[canvas.id] = createChart(canvas.id, defaultDataset);
-    });
-
-    function updateChart(chartId, selectedDataset) {
-        const num1 = parseInt(document.getElementById("num1").value);
-        const num2 = parseInt(document.getElementById("num2").value);
-
-        if (num1 > num2) {
-            alert("Start date must be less than or equal to end date.");
-            return;
+        function generateLabels(datasetName, start, end) {
+            if (!chartData[datasetName]) return [];
+            return chartData[datasetName].slice(start, end + 1).map(item => item[0]);
         }
 
-        const dataPoints = chartData[selectedDataset].slice(num1, num2 + 1);
-        charts[chartId].data.labels = generateLabels(num1, num2);
-        charts[chartId].data.datasets[0].data = dataPoints;
-        charts[chartId].data.datasets[0].label = selectedDataset;
-        charts[chartId].update();
-    }
+        function createChart(chartId, datasetName, columnIndex = 1, start = 0, end = chartData[datasetName].length - 1) {
+            const ctx = document.getElementById(chartId).getContext('2d');
 
-    // Listen for changes in num1 and num2
-    document.getElementById("num1").addEventListener("change", () => {
-        Object.keys(charts).forEach(chartId => {
-            const selectElement = document.getElementById(`select${chartId.replace('chart', '')}`);
-            updateChart(chartId, selectElement.value);
-        });
-    });
+            const dataPoints = chartData[datasetName].slice(start, end + 1).map(item => item[columnIndex]); // Extract Y values
 
-    document.getElementById("num2").addEventListener("change", () => {
-        Object.keys(charts).forEach(chartId => {
-            const selectElement = document.getElementById(`select${chartId.replace('chart', '')}`);
-            updateChart(chartId, selectElement.value);
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: generateLabels(datasetName, start, end), // Extract X-axis labels
+                    datasets: [{
+                        label: `${datasetName} - Column ${columnIndex}`,
+                        data: dataPoints,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updateChart(chartId) {
+            const selectDataset = document.getElementById(`select-dataset${chartId.replace("chart", "")}`);
+            const selectColumn = document.getElementById(`select-column${chartId.replace("chart", "")}`);
+
+            const datasetName = selectDataset.value;
+            const columnIndex = parseInt(selectColumn.value); // Convert to integer
+
+            const num1 = parseInt(document.getElementById("num1").value);
+            const num2 = parseInt(document.getElementById("num2").value);
+
+            if (num1 > num2) {
+                alert("Start date must be less than or equal to end date.");
+                return;
+            }
+
+            const datasetSlice = chartData[datasetName].slice(num1, num2 + 1);
+            const dataPoints = datasetSlice.map(item => item[columnIndex]); // Extract chosen column values
+
+            charts[chartId].data.labels = datasetSlice.map(item => item[0]); // Extract X labels
+            charts[chartId].data.datasets[0].data = dataPoints;
+            charts[chartId].data.datasets[0].label = `${datasetName} - Column ${columnIndex}`;
+            charts[chartId].update();
+        }
+
+        // Create charts for each quadrant
+        const charts = {};
+        document.querySelectorAll("canvas").forEach((canvas, index) => {
+            const selectDataset = document.getElementById(`select-dataset${index + 1}`);
+            const defaultDataset = selectDataset.value;
+
+            charts[canvas.id] = createChart(canvas.id, defaultDataset);
         });
-    });
     </script>
-
 </body>
 </html>
