@@ -16,7 +16,7 @@ namespace OpenHardwareMonitor
             // Create component table
             string createComponentTableQuery = @"
                 CREATE TABLE IF NOT EXISTS component (
-                    serial_number INTEGER PRIMARY KEY,
+                    serial_number VARCHAR(128) PRIMARY KEY,
                     device_type TEXT NOT NULL,
                     v_ram INTEGER,
                     stock_core_speed REAL,
@@ -27,7 +27,7 @@ namespace OpenHardwareMonitor
             // Create component_statistic table
             string createComponentStatisticTableQuery = @"
                 CREATE TABLE IF NOT EXISTS component_statistic (
-                    serial_number INTEGER,
+                    serial_number VARCHAR(128),
                     timestamp DATETIME,
                     machine_state TEXT NOT NULL,
                     temperature REAL,
@@ -53,6 +53,17 @@ namespace OpenHardwareMonitor
                     PRIMARY KEY (pid, timestamp)
                 );";
             ExecuteNonQuery(createProcessTableQuery);
+        }
+
+        public static bool ComponentExists(string serialNumber)
+        {
+            string query = "SELECT COUNT(*) FROM component WHERE serial_number = @serialNumber;";
+            using (var command = new SQLiteCommand(query, dbConnection))
+            {
+                command.Parameters.AddWithValue("@serialNumber", serialNumber);
+                int count = Convert.ToInt32(command.ExecuteScalar());
+                return count > 0;
+            }
         }
 
         public static void InsertComponent(string serialNumber, string deviceType, int? vRam, float? stockCoreSpeed, float? stockMemorySpeed)
