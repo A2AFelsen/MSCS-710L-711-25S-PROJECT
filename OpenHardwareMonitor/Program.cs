@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management;
 using System.Security.Principal;
@@ -86,11 +87,29 @@ namespace OpenHardwareMonitor
                 float stockCoreSpeed = 0;
                 float stockMemorySpeed = 0;
 
+                // Get stock core and memory speeds based on hardware type
+                switch (hardwareItem.HardwareType)
+                {
+                    case HardwareType.CPU:
+                        stockCoreSpeed = GetCpuBaseClockSpeed(); // Fetch CPU base clock speed
+                        break;
+                    case HardwareType.GpuNvidia:
+                    case HardwareType.GpuAti:
+                        (stockCoreSpeed, stockMemorySpeed) = GetGpuBaseClockSpeeds(); // Fetch GPU base clock and memory speeds
+                        break;
+                    case HardwareType.RAM:
+                        stockMemorySpeed = GetRamSpeed(); // Fetch RAM speed
+                        break;
+                    default:
+                        // For other hardware types, set default values or skip
+                        break;
+                }
+
                 foreach (var sensor in hardwareItem.Sensors)
                 {
                     if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
                     {
-                        Console.WriteLine($"  Temperature Sensor Found: {sensor.Name}, Value: {temperature}");
+                        Console.WriteLine($"  Temperature Sensor Found: {sensor.Name}, Value: {sensor.Value}");
                         temperature = sensor.Value.Value;
                     }
                     else if (sensor.SensorType == SensorType.Power && sensor.Value.HasValue)
@@ -245,6 +264,46 @@ namespace OpenHardwareMonitor
                 Console.WriteLine($"Error retrieving {wmiClass} serial number: {ex.Message}");
             }
             return "Not Available";
+        }
+
+        private static float GetCpuBaseClockSpeed()
+        {
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT MaxClockSpeed FROM Win32_Processor");
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    return Convert.ToSingle(obj["MaxClockSpeed"]) / 1000f; // Convert MHz to GHz
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving CPU base clock speed: {ex.Message}");
+            }
+            return 0; // Default value if retrieval fails
+        }
+
+        private static (float coreSpeed, float memorySpeed) GetGpuBaseClockSpeeds()
+        {
+            // Example: Use predefined values or fetch from a library like NVAPI/ADL
+            return (1200f, 7000f); // Placeholder values
+        }
+
+        private static float GetRamSpeed()
+        {
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Speed FROM Win32_PhysicalMemory");
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    return Convert.ToSingle(obj["Speed"]); // Speed in MHz
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving RAM speed: {ex.Message}");
+            }
+            return 0; // Default value if retrieval fails
         }
 
         private static bool IsRunningAsAdministrator()
