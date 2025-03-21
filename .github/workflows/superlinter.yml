@@ -47,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: bin/Release
+          path: OpenHardwareMonitor/bin/Release/OpenHardwareMonitor.exe
