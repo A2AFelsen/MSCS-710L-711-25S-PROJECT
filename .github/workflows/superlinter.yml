@@ -49,7 +49,7 @@ jobs:
               exit 1
           }
           echo "MSBuild Path: $msbuildPath"
-          echo "::set-output name=msbuildPath::$msbuildPath"
+          echo "msbuildPath=$msbuildPath" >> $GITHUB_OUTPUT
 
       - name: Debug MSBuild path
         shell: pwsh
