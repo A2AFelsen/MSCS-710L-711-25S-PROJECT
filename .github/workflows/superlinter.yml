@@ -63,7 +63,7 @@ jobs:
         run: echo "${{ toJson(steps.gitversion.outputs) }}"
 
       - name: Print version
-        run: echo "Version: ${{ steps.gitversion.outputs.SemVer }}"
+        run: echo "Version: ${{ steps.gitversion.outputs.fullSemVer || 'Unknown' }}"
 
       - name: Build the project
         working-directory: OpenHardwareMonitor
