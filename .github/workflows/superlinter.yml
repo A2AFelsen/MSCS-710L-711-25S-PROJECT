@@ -56,9 +56,11 @@ jobs:
         uses: gittools/actions/gitversion/execute@v0
         with:
           useConfigFile: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print version
-        run: echo "Version: \${{ steps.gitversion.outputs.semVer }}"
+        run: echo "Version: ${{ steps.gitversion.outputs.semVer }}"
 
       - name: Build the project
         working-directory: OpenHardwareMonitor
