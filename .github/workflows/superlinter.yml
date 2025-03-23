@@ -33,6 +33,11 @@ jobs:
         working-directory: OpenHardwareMonitor
         run: nuget restore
 
+      - name: List Visual Studio directories
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio"
+
       - name: Find MSBuild path
         id: find-msbuild
         shell: pwsh
@@ -43,6 +48,9 @@ jobs:
               Write-Error "vswhere.exe not found at $vswherePath"
               exit 1
           }
+          echo "vswhere.exe found at $vswherePath"
+
+          # Locate MSBuild
           $msbuildPath = & "$vswherePath" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
           if (-Not (Test-Path $msbuildPath)) {
               Write-Error "MSBuild not found at $msbuildPath"
