@@ -14,37 +14,88 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Run Super-Linter
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER_REGEX_EXCLUDE: .*\.github/workflows/superlinter\.yml.*
 
   build-and-test:
     name: Build and Test
     runs-on: windows-latest
+    strategy:
+      matrix:
+        dotnet-version: ['4.8', '6.0.x', '7.0.x']
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v2
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
         with:
-          dotnet-version: '4.8'
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Set up .NET SDK (for .NET Core/5+)
+        if: matrix.dotnet-version != '4.8'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Restore NuGet packages
+        working-directory: OpenHardwareMonitor
         run: nuget restore
 
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v1
+        with:
+          useConfigFile: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug GitVersion Outputs
+        run: echo "${{ toJson(steps.gitversion.outputs) }}"
+
+      - name: Print version
+        run: echo "Version: ${{ steps.gitversion.outputs.fullSemVer || 'Unknown' }}"
+
       - name: Build the project
-        run: msbuild OpenHardwareMonitor.sln /p:Configuration=Release
+        working-directory: OpenHardwareMonitor
+        shell: pwsh
+        run: |
+          if ("${{ matrix.dotnet-version }}" -eq "4.8") {
+              & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" OpenHardwareMonitor.sln /p:Configuration=Release
+          } else {
+              dotnet build OpenHardwareMonitor.sln --configuration Release
+          }
 
       - name: Run tests
+        working-directory: OpenHardwareMonitor
         run: dotnet test --no-build --configuration Release
 
       - name: Publish build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
-          path: bin/Release
+          name: build-artifacts-${{ matrix.dotnet-version }}
+          path: OpenHardwareMonitor/bin/Release/OpenHardwareMonitor.exe
+
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'csharp'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
