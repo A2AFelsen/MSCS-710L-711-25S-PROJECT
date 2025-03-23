@@ -72,7 +72,7 @@
             <!-- Dropdown to Select Dataset -->
             <select class="form-select dataset-select" id="select-dataset{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}')">
                 {% for dataset_name in dataset_keys %}
-                    <option value="{{ dataset_name }}" >
+                    <option value="{{ dataset_name }}" {% if loop.index0 == i %}selected{% endif %}>
                         {{ dataset_name }}
                     </option>
                 {% endfor %}
@@ -80,9 +80,9 @@
 
             <!-- Dropdown to Select Column Index -->
             <select class="form-select column-select" id="select-column{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}')">
-                <option value="1">Column 1</option>
-                <option value="2">Column 2</option>
-                <option value="3">Column 3</option>
+                <option value="1">Usage</option>
+                <option value="2">Total Ram</option>
+                <option value="3">Random</option>
             </select>
 
             <canvas id="chart{{ i + 1 }}"></canvas>
