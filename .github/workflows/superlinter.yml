@@ -53,14 +53,17 @@ jobs:
 
       - name: Determine version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v0
+        uses: gittools/actions/gitversion/execute@v1
         with:
           useConfigFile: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug GitVersion Outputs
+        run: echo "${{ toJson(steps.gitversion.outputs) }}"
+
       - name: Print version
-        run: echo "Version: ${{ steps.gitversion.outputs.semVer }}"
+        run: echo "Version: ${{ steps.gitversion.outputs.SemVer }}"
 
       - name: Build the project
         working-directory: OpenHardwareMonitor
