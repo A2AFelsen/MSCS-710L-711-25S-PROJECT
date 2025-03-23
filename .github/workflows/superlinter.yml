@@ -33,9 +33,39 @@ jobs:
         working-directory: OpenHardwareMonitor
         run: nuget restore
 
+      - name: Find MSBuild path
+        id: find-msbuild
+        shell: pwsh
+        run: |
+          # Use vswhere to locate MSBuild
+          $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (-Not (Test-Path $vswherePath)) {
+              Write-Error "vswhere.exe not found at $vswherePath"
+              exit 1
+          }
+          $msbuildPath = & "$vswherePath" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+          if (-Not (Test-Path $msbuildPath)) {
+              Write-Error "MSBuild not found at $msbuildPath"
+              exit 1
+          }
+          echo "MSBuild Path: $msbuildPath"
+          echo "::set-output name=msbuildPath::$msbuildPath"
+
+      - name: Debug MSBuild path
+        shell: pwsh
+        run: |
+          echo "MSBuild Path from previous step: ${{ steps.find-msbuild.outputs.msbuildPath }}"
+
       - name: Build the project
         working-directory: OpenHardwareMonitor
-        run: msbuild OpenHardwareMonitor.sln /p:Configuration=Release
+        shell: pwsh
+        run: |
+          $msbuildPath = "${{ steps.find-msbuild.outputs.msbuildPath }}"
+          if (-Not (Test-Path $msbuildPath)) {
+              Write-Error "MSBuild not found at $msbuildPath"
+              exit 1
+          }
+          & "$msbuildPath" OpenHardwareMonitor.sln /p:Configuration=Release
 
       - name: Run tests
         working-directory: OpenHardwareMonitor
