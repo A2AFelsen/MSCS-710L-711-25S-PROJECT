@@ -63,7 +63,7 @@ jobs:
         run: echo "${{ toJson(steps.gitversion.outputs) }}"
 
       - name: Print version
-        run: echo "Version: ${GITVERSION_OUTPUT:-Unknown}"
+        run: echo "Version ${GITVERSION_OUTPUT:-Unknown}"
 
       - name: Build the project
         working-directory: OpenHardwareMonitor
