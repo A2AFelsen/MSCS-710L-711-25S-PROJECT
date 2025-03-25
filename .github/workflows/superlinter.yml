@@ -50,8 +50,7 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Restore NuGet packages
-        working-directory: OpenHardwareMonitor
-        run: nuget restore
+        run: nuget restore OpenHardwareMonitor/OpenHardwareMonitor.sln
 
       - name: Determine version
         id: gitversion
@@ -62,25 +61,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug GitVersion Outputs
-        run: echo "${{ toJson(steps.gitversion.outputs) }}"
-
       - name: Print version
         run: echo "Version ${GITVERSION_OUTPUT:-Unknown}"
 
       - name: Build the project
-        working-directory: OpenHardwareMonitor
         shell: pwsh
         run: |
           if ("${{ matrix.dotnet-version }}" -eq "4.8") {
-              & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" OpenHardwareMonitor.sln /p:Configuration=Release
+              & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" OpenHardwareMonitor/OpenHardwareMonitor.sln /p:Configuration=Release
           } else {
-              dotnet build OpenHardwareMonitor.sln --configuration Release
+              dotnet build OpenHardwareMonitor/OpenHardwareMonitor.sln --configuration Release
           }
 
       - name: Run tests
-        working-directory: OpenHardwareMonitor
-        run: dotnet test --no-build --configuration Release
+        run: dotnet test OpenHardwareMonitor/OpenHardwareMonitor.sln --no-build --configuration Release
 
       - name: Publish build artifacts
         uses: actions/upload-artifact@v4
@@ -101,9 +95,12 @@ jobs:
         uses: github/codeql-action/init@v2
         with:
           languages: 'csharp'
+          queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
+      - name: Build for CodeQL
+        run: |
+          dotnet restore OpenHardwareMonitor/OpenHardwareMonitor.sln
+          dotnet build OpenHardwareMonitor/OpenHardwareMonitor.sln --configuration Release
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
