@@ -95,13 +95,14 @@ jobs:
     runs-on: windows-latest
     needs: build-and-test
     permissions:
+      contents: read
       security-events: write
-      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup NuGet
         uses: nuget/setup-nuget@v1
@@ -124,5 +125,3 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
