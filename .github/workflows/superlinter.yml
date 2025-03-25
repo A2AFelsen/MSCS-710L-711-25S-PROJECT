@@ -94,6 +94,9 @@ jobs:
     name: CodeQL Analysis
     runs-on: windows-latest
     needs: build-and-test
+    permissions:
+      security-events: write
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -121,3 +124,5 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
