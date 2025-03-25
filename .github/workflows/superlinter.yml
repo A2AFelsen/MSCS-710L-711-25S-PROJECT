@@ -100,6 +100,14 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-version: '6.x'
+
+      - name: Restore NuGet packages
+        run: nuget restore OpenHardwareMonitor/OpenHardwareMonitor.sln
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
