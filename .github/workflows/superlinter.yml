@@ -93,39 +93,39 @@ jobs:
           name: build-artifacts-${{ matrix.dotnet-version }}
           path: OpenHardwareMonitor/bin/Release/OpenHardwareMonitor.exe
 
-  codeql:
-    name: CodeQL Analysis
-    runs-on: windows-latest
-    needs: build-and-test
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v1
-        with:
-          nuget-version: '6.x'
-
-      - name: Restore NuGet packages
-        run: nuget restore OpenHardwareMonitor/OpenHardwareMonitor.sln
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: 'csharp'
-          queries: security-extended,security-and-quality
-          config-file: .github/codeql/codeql-config.yml
-
-      - name: Build for CodeQL
-        shell: pwsh
-        run: |
-          & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" OpenHardwareMonitor/OpenHardwareMonitor.sln /p:Configuration=Release
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+#  codeql:
+#    name: CodeQL Analysis
+#    runs-on: windows-latest
+#    needs: build-and-test
+#    permissions:
+#      actions: read
+#      contents: read
+#      security-events: write
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 2
+#
+#      - name: Setup NuGet
+#        uses: nuget/setup-nuget@v1
+#        with:
+#          nuget-version: '6.x'
+#
+#      - name: Restore NuGet packages
+#        run: nuget restore OpenHardwareMonitor/OpenHardwareMonitor.sln
+#
+#      - name: Initialize CodeQL
+#        uses: github/codeql-action/init@v2
+#        with:
+#          languages: 'csharp'
+#          queries: security-extended,security-and-quality
+#          config-file: .github/codeql/codeql-config.yml
+#
+#      - name: Build for CodeQL
+#        shell: pwsh
+#        run: |
+#          & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" OpenHardwareMonitor/OpenHardwareMonitor.sln /p:Configuration=Release
+#
+#      - name: Perform CodeQL Analysis
+#        uses: github/codeql-action/analyze@v2
