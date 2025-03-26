@@ -1,0 +1,2 @@
+# Ignore .NET public key tokens in config files
+regex = b77a5c561934e089
