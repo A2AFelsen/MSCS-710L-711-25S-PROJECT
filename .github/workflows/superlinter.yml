@@ -24,8 +24,6 @@ jobs:
           FILTER_REGEX_EXCLUDE: .*\.github/workflows/superlinter\.yml.*
           MARKDOWN_FIX_END_OF_FILE: true
           PYTHON_BLACK_CONFIG_FILE: .python-black
-          MARKDOWN_FIX_END_OF_FILE: true
-          PYTHON_BLACK_CONFIG_FILE: .python-black
           PYTHON_ISORT_CONFIG_FILE: .isort.cfg
 
   build-and-test:
