@@ -20,26 +20,40 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download Build Artifacts
+      - name: Download .NET 4.8 Artifact
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-4.8
           path: release_files
+
+      - name: Verify Artifact Download
+        run: |
+          echo "Downloaded files:"
+          ls -la release_files/
+          if [ ! -f "release_files/OpenHardwareMonitor.exe" ]; then
+            echo "Error: OpenHardwareMonitor.exe not found!"
+            exit 1
+          fi
 
       - name: Prepare Display Files
         run: |
           mkdir -p release_files/Display
           cp -r Display/* release_files/Display/
           rm -rf release_files/Display/__pycache__
+          rm -f release_files/Display/*.pyc
 
       - name: Create Zip Package
         run: |
           cd release_files
-          zip -r ../OpenHardwareMonitor-Release.zip ./
+          zip -r ../OpenHardwareMonitor-Release.zip ./*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
+          name: "OpenHardwareMonitor v$(date +'%Y.%m.%d')"
+          body: "Automatic release containing the latest build"
           files: OpenHardwareMonitor-Release.zip
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
