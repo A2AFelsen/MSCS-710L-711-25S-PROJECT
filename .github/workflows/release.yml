@@ -20,13 +20,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: List and Download .NET 4.8 Artifact
+      - name: Download .NET 4.8 Artifact via API
         uses: actions/github-script@v6
-        id: get-artifact
         with:
           script: |
-            await new Promise(resolve => setTimeout(resolve, 5000));
-
             const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -39,13 +36,23 @@ jobs:
               return;
             }
 
-            return artifact.id;
+            const download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: artifact.id,
+              archive_format: 'zip',
+            });
 
-      - name: Download .NET 4.8 Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts-4.8
-          path: release_files
+            const fs = require('fs');
+            const path = require('path');
+            const extract = require('extract-zip');
+
+            fs.mkdirSync('release_files', { recursive: true });
+            const zipPath = path.join('release_files', 'artifact.zip');
+            fs.writeFileSync(zipPath, Buffer.from(download.data));
+
+            await extract(zipPath, { dir: path.resolve('release_files') });
+            fs.unlinkSync(zipPath);
 
       - name: Verify Artifact Download
         run: |
