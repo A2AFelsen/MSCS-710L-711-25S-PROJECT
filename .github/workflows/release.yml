@@ -20,6 +20,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: List Available Artifacts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+            console.log('Available artifacts:');
+            artifacts.data.artifacts.forEach(artifact => {
+              console.log(`- ${artifact.name} (ID: ${artifact.id})`);
+            });
+
       - name: Download .NET 4.8 Artifact
         uses: actions/download-artifact@v4
         with:
@@ -28,10 +42,10 @@ jobs:
 
       - name: Verify Artifact Download
         run: |
-          echo "Downloaded files:"
-          ls -la release_files/
+          echo "Contents of release_files:"
+          ls -R release_files
           if [ ! -f "release_files/OpenHardwareMonitor.exe" ]; then
-            echo "Error: OpenHardwareMonitor.exe not found!"
+            echo "Error: OpenHardwareMonitor.exe not found in expected location!"
             exit 1
           fi
 
