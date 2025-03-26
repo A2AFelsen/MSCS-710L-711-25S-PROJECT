@@ -20,19 +20,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: List Available Artifacts
+      - name: List and Download .NET 4.8 Artifact
         uses: actions/github-script@v6
+        id: get-artifact
         with:
           script: |
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
             const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
               run_id: context.payload.workflow_run.id,
             });
-            console.log('Available artifacts:');
-            artifacts.data.artifacts.forEach(artifact => {
-              console.log(`- ${artifact.name} (ID: ${artifact.id})`);
-            });
+
+            const artifact = artifacts.data.artifacts.find(a => a.name === 'build-artifacts-4.8');
+            if (!artifact) {
+              core.setFailed('build-artifacts-4.8 artifact not found');
+              return;
+            }
+
+            return artifact.id;
 
       - name: Download .NET 4.8 Artifact
         uses: actions/download-artifact@v4
