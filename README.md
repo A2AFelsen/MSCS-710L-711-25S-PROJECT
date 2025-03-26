@@ -1,13 +1,13 @@
+# Metrics: The Gathering
+
 A github repository for Michael Huffer, Michael Laffan, and Frank Seelmann's MSCS-710L-711-25S-PROJECT.
 
-Discord Server Invite Link:
-https://discord.gg/Kwb6VZGQYP
+[Discord Server](https://discord.gg/Kwb6VZGQYP)
 
 
 Steps to run OpenHardwareMonitor:
 
-1. Download latest version of .Net Framework, preferably 4.8.1.
-https://dotnet.microsoft.com/en-us/download/dotnet-framework
+1. Download latest version of [.Net Framework](https://dotnet.microsoft.com/en-us/download/dotnet-framework), preferably 4.8.1.
 
 2. Open Visual Studio and click Create New Project.
 
