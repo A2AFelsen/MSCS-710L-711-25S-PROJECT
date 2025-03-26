@@ -10,12 +10,8 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     if: |
-      github.event.workflow_run.jobs.any(job =>
-        job.name == 'build-and-test' && job.conclusion == 'success'
-      ) &&
-      github.event.workflow_run.jobs.any(job =>
-        job.name == 'codeql' && job.conclusion == 'success'
-      )
+      contains(fromJson('["success"]', github.event.workflow_run.jobs.*.conclusion) &&
+      contains(fromJson('["build-and-test", "codeql"]', github.event.workflow_run.jobs.*.name)
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
