@@ -21,6 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download .NET 4.8 Artifact via API
+        id: download-artifact
         uses: actions/github-script@v6
         with:
           script: |
@@ -43,16 +44,14 @@ jobs:
               archive_format: 'zip',
             });
 
-            const fs = require('fs');
-            const path = require('path');
-            const extract = require('extract-zip');
+            return download.url;
 
-            fs.mkdirSync('release_files', { recursive: true });
-            const zipPath = path.join('release_files', 'artifact.zip');
-            fs.writeFileSync(zipPath, Buffer.from(download.data));
-
-            await extract(zipPath, { dir: path.resolve('release_files') });
-            fs.unlinkSync(zipPath);
+      - name: Download and Extract Artifact
+        run: |
+          curl -L -o artifact.zip "${{ steps.download-artifact.outputs.result }}"
+          mkdir -p release_files
+          unzip artifact.zip -d release_files
+          rm artifact.zip
 
       - name: Verify Artifact Download
         run: |
