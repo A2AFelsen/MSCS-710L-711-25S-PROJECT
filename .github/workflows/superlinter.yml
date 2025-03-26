@@ -120,6 +120,7 @@ jobs:
         with:
           languages: 'csharp'
           queries: security-extended,security-and-quality
+          config-file: .github/codeql/codeql-config.yml
 
       - name: Build for CodeQL
         shell: pwsh
@@ -128,5 +129,3 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
