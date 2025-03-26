@@ -10,11 +10,15 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     if: |
-      contains(fromJson('["success"]', github.event.workflow_run.jobs.*.conclusion) &&
-      contains(fromJson('["build-and-test", "codeql"]', github.event.workflow_run.jobs.*.name)
+      github.event.workflow_run.conclusion == 'success' ||
+      (github.event.workflow_run.conclusion == 'failure' &&
+       !contains(toJson(github.event.workflow_run.jobs.*.name), 'build-and-test') &&
+       !contains(toJson(github.event.workflow_run.jobs.*.name), 'codeql'))
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v3
