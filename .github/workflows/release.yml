@@ -13,7 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          path: source-repo
+          fetch-depth: 0
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+
+      - name: Create git tag
+        id: tag
+        run: |
+          git tag "v${{ steps.date.outputs.date }}"
+          git push origin "v${{ steps.date.outputs.date }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download .NET 4.8 Artifact
         uses: dawidd6/action-download-artifact@v2
@@ -36,10 +48,8 @@ jobs:
 
       - name: Prepare Display Files
         run: |
-          echo "Contents of source-repo:"
-          ls -R source-repo
           mkdir -p release_files/Display
-          cp -r source-repo/Display/* release_files/Display/
+          cp -r Display/* release_files/Display/
           rm -rf release_files/Display/__pycache__
           rm -f release_files/Display/*.pyc
 
@@ -51,7 +61,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "OpenHardwareMonitor v$(date +'%Y.%m.%d')"
+          tag_name: "v${{ steps.date.outputs.date }}"
+          name: "OpenHardwareMonitor v${{ steps.date.outputs.date }}"
           body: "Automatic release containing the latest build"
           files: OpenHardwareMonitor-Release.zip
           draft: false
