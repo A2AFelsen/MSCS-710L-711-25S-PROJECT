@@ -20,8 +20,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Artifact ID
-        id: get-artifact
+      - name: List Available Artifacts
         uses: actions/github-script@v6
         with:
           script: |
@@ -30,27 +29,16 @@ jobs:
               repo: context.repo.repo,
               run_id: context.payload.workflow_run.id,
             });
+            console.log('Available artifacts:');
+            artifacts.data.artifacts.forEach(artifact => {
+              console.log(`- ${artifact.name} (ID: ${artifact.id})`);
+            });
 
-            const artifact = artifacts.data.artifacts.find(a => a.name === 'build-artifacts-4.8');
-            if (!artifact) {
-              core.setFailed('build-artifacts-4.8 artifact not found');
-              return;
-            }
-
-            core.setOutput('artifact-id', artifact.id);
-
-      - name: Download Artifact
-        run: |
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/suites/${{ github.event.workflow_run.id }}/artifacts/${{ steps.get-artifact.outputs.artifact-id }}"
-
-          curl -sSL -o artifact.zip \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            -L "$DOWNLOAD_URL"
-
-          mkdir -p release_files
-          unzip artifact.zip -d release_files
-          rm artifact.zip
+      - name: Download .NET 4.8 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-4.8
+          path: release_files
 
       - name: Verify Artifact Download
         run: |
