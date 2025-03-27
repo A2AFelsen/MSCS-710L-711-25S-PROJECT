@@ -20,8 +20,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download .NET 4.8 Artifact via API
-        id: download-artifact
+      - name: Get Artifact Download URL
+        id: get-artifact
         uses: actions/github-script@v6
         with:
           script: |
@@ -37,21 +37,21 @@ jobs:
               return;
             }
 
-            const download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: artifact.id,
-              archive_format: 'zip',
-            });
+            return artifact.id;
 
-            return download.url;
-
-      - name: Download and Extract Artifact
+      - name: Download Artifact
         run: |
-          curl -L -o artifact.zip "${{ steps.download-artifact.outputs.result }}"
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/actions/artifacts/${{ steps.get-artifact.outputs.result }}/zip \
+            --output artifact.zip
+
           mkdir -p release_files
           unzip artifact.zip -d release_files
           rm artifact.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify Artifact Download
         run: |
