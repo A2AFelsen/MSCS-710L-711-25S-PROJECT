@@ -41,11 +41,14 @@ jobs:
 
       - name: Download Artifact
         run: |
-          gh api \
+          DOWNLOAD_URL=$(curl -sSL \
             -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/artifacts/${{ steps.get-artifact.outputs.result }}/zip \
-            --output artifact.zip
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ steps.get-artifact.outputs.result }}/zip" \
+            | jq -r '.url')
+
+          curl -sSL -o artifact.zip -L "$DOWNLOAD_URL"
 
           mkdir -p release_files
           unzip artifact.zip -d release_files
