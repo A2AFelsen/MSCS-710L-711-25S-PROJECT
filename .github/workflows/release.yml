@@ -9,47 +9,8 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    if: |
-      github.event.workflow_run.conclusion == 'success' ||
-      (github.event.workflow_run.conclusion == 'failure' &&
-       !contains(toJson(github.event.workflow_run.jobs.*.name), 'build-and-test') &&
-       !contains(toJson(github.event.workflow_run.jobs.*.name), 'codeql'))
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Debug Workflow Run Info
-        run: |
-          echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Run Attempt: ${{ github.run_attempt }}"
-
-      - name: List Available Artifacts (Detailed)
-        uses: actions/github-script@v6
-        id: list-artifacts
-        with:
-          script: |
-            try {
-              const response = await github.rest.actions.listWorkflowRunArtifacts({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: context.payload.workflow_run.id,
-              });
-              console.log('Available artifacts:');
-              response.data.artifacts.forEach(artifact => {
-                console.log(`- ${artifact.name} (ID: ${artifact.id}, Size: ${artifact.size_in_bytes} bytes, Created: ${artifact.created_at})`);
-              });
-              return response.data.artifacts;
-            } catch (error) {
-              console.error('Error listing artifacts:', error);
-              core.setFailed('Failed to list artifacts');
-              return [];
-            }
-
-      - name: Download .NET 4.8 Artifact (Alternative Method)
-        id: download-artifact
+      - name: Download .NET 4.8 Artifact
         uses: dawidd6/action-download-artifact@v2
         with:
           name: build-artifacts-4.8
@@ -62,25 +23,23 @@ jobs:
       - name: Verify Artifact Download
         run: |
           echo "Contents of release_files:"
-          ls -R release_files || true
-          if [ ! -f "release_files/OpenHardwareMonitor/bin/Release/OpenHardwareMonitor.exe" ]; then
-            echo "Checking alternative paths..."
-            find release_files -name "OpenHardwareMonitor.exe" || true
-            echo "Error: OpenHardwareMonitor.exe not found in expected location!"
+          ls -R release_files
+          if [ ! -f "release_files/OpenHardwareMonitor.exe" ]; then
+            echo "Error: OpenHardwareMonitor.exe not found!"
             exit 1
           fi
 
       - name: Prepare Display Files
         run: |
-          mkdir -p release_files/OpenHardwareMonitor/Display
-          cp -r Display/* release_files/OpenHardwareMonitor/Display/
-          rm -rf release_files/OpenHardwareMonitor/Display/__pycache__
-          rm -f release_files/OpenHardwareMonitor/Display/*.pyc
+          mkdir -p release_files/Display
+          cp -r Display/* release_files/Display/
+          rm -rf release_files/Display/__pycache__
+          rm -f release_files/Display/*.pyc
 
       - name: Create Zip Package
         run: |
-          cd release_files/OpenHardwareMonitor
-          zip -r ../../OpenHardwareMonitor-Release.zip ./*
+          cd release_files
+          zip -r ../OpenHardwareMonitor-Release.zip ./*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
