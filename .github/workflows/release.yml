@@ -10,6 +10,11 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: source-repo
+
       - name: Download .NET 4.8 Artifact
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -31,8 +36,10 @@ jobs:
 
       - name: Prepare Display Files
         run: |
+          echo "Contents of source-repo:"
+          ls -R source-repo
           mkdir -p release_files/Display
-          cp -r Display/* release_files/Display/
+          cp -r source-repo/Display/* release_files/Display/
           rm -rf release_files/Display/__pycache__
           rm -f release_files/Display/*.pyc
 
