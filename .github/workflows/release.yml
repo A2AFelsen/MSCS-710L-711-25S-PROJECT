@@ -38,28 +38,28 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-4.8
-          path: release_files
+          path: release_files/OpenHardwareMonitor
 
       - name: Verify Artifact Download
         run: |
           echo "Contents of release_files:"
           ls -R release_files
-          if [ ! -f "release_files/OpenHardwareMonitor.exe" ]; then
+          if [ ! -f "release_files/OpenHardwareMonitor/bin/Release/OpenHardwareMonitor.exe" ]; then
             echo "Error: OpenHardwareMonitor.exe not found in expected location!"
             exit 1
           fi
 
       - name: Prepare Display Files
         run: |
-          mkdir -p release_files/Display
-          cp -r Display/* release_files/Display/
-          rm -rf release_files/Display/__pycache__
-          rm -f release_files/Display/*.pyc
+          mkdir -p release_files/OpenHardwareMonitor/Display
+          cp -r Display/* release_files/OpenHardwareMonitor/Display/
+          rm -rf release_files/OpenHardwareMonitor/Display/__pycache__
+          rm -f release_files/OpenHardwareMonitor/Display/*.pyc
 
       - name: Create Zip Package
         run: |
-          cd release_files
-          zip -r ../OpenHardwareMonitor-Release.zip ./*
+          cd release_files/OpenHardwareMonitor
+          zip -r ../../OpenHardwareMonitor-Release.zip ./*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

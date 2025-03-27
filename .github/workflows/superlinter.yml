@@ -93,8 +93,17 @@ jobs:
           name: build-artifacts-${{ matrix.dotnet-version }}
           path: |
             OpenHardwareMonitor/bin/Release/
+        if: matrix.dotnet-version != '4.8'
+
+      - name: Publish .NET 4.8 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-4.8
+          path: |
+            OpenHardwareMonitor/bin/Release/
             OpenHardwareMonitor/bin/Release/x64/
             OpenHardwareMonitor/bin/Release/x86/
+        if: matrix.dotnet-version == '4.8'
 
 #  codeql:
 #    name: CodeQL Analysis
