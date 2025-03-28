@@ -31,7 +31,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        dotnet-version: ['4.8', '6.0.x', '7.0.x']
+        dotnet-version: ['4.8', '6.0.x', '7.0.x'] # Test multiple frameworks
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,9 +53,10 @@ jobs:
             6.0.x
             7.0.x
 
+      # Special handling for .NET Framework 4.8
       - name: Install .NET Framework 4.8 Developer Pack
         if: matrix.dotnet-version == '4.8'
-        run: choco install netfx-4.8-devpack -y
+        run: choco install netfx-4.8-devpack -y # Chocolatey package
 
       - name: Restore NuGet packages
         run: nuget restore OpenHardwareMonitor/OpenHardwareMonitor.sln
@@ -75,6 +76,7 @@ jobs:
       - name: Print version
         run: echo "Version ${GITVERSION_OUTPUT:-Unknown}"
 
+      # Different build commands for Framework vs Core
       - name: Build the project
         shell: pwsh
         run: |
@@ -95,6 +97,7 @@ jobs:
             OpenHardwareMonitor/bin/Release/
         if: matrix.dotnet-version != '4.8'
 
+      # Different artifact patterns for 4.8 (needs x64/x86 DLLs)
       - name: Publish .NET 4.8 artifacts
         uses: actions/upload-artifact@v4
         with:
