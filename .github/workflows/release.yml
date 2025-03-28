@@ -1,7 +1,6 @@
 name: Create Release
 
 on:
-  # Trigger when main CI/CD pipeline completes
   workflow_run:
     workflows: ["CI/CD Pipeline"]
     types:
@@ -11,32 +10,27 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for creating releases/tags
-
+      contents: write
     steps:
-      # Get full repo history for version tagging
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # Generate consistent date-based version
       - name: Get current date
         id: date
         run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
 
-      # Download built artifacts using reliable fallback method
       - name: Download .NET 4.8 Artifact
         uses: dawidd6/action-download-artifact@v2
         with:
           name: build-artifacts-4.8
-          path: release_files  # All files will be here
+          path: release_files
           workflow: ci-cd-pipeline.yml
           run_id: ${{ github.event.workflow_run.id }}
           repo: ${{ github.repository }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Verify we got the key executable
       - name: Verify Artifact Download
         run: |
           echo "Contents of release_files:"
@@ -46,30 +40,27 @@ jobs:
             exit 1
           fi
 
-      # Add display components to package
       - name: Prepare Display Files
         run: |
           mkdir -p release_files/Display
           cp -r Display/* release_files/Display/
-          rm -rf release_files/Display/__pycache__  # Clean Python cache
-          rm -f release_files/Display/*.pyc         # Remove compiled Python
+          rm -rf release_files/Display/__pycache__
+          rm -f release_files/Display/*.pyc
 
-      # Create final distributable zip
       - name: Create Zip Package
         run: |
           cd release_files
-          zip -r ../OpenHardwareMonitor-Release.zip ./*  # Package everything
+          zip -r ../OpenHardwareMonitor-Release.zip ./*
 
-      # Create GitHub release with version tag
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: "v${{ steps.date.outputs.date }}"  # vYYYY.MM.DD
+          tag_name: "v${{ steps.date.outputs.date }}"
           name: "OpenHardwareMonitor v${{ steps.date.outputs.date }}"
           body: "Automatic release containing the latest build"
           files: OpenHardwareMonitor-Release.zip
           draft: false
           prerelease: false
-          generate_release_notes: true  # Auto-populate release notes
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
