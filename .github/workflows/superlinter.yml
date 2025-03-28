@@ -103,9 +103,9 @@ jobs:
         with:
           name: build-artifacts-4.8
           path: |
-            OpenHardwareMonitor/bin/Release/
-            OpenHardwareMonitor/bin/Release/x64/
-            OpenHardwareMonitor/bin/Release/x86/
+            OpenHardwareMonitor/bin/Release/      # Main files
+            OpenHardwareMonitor/bin/Release/x64/  # 64-bit DLLs
+            OpenHardwareMonitor/bin/Release/x86/  # 32-bit DLLs
         if: matrix.dotnet-version == '4.8'
 
 #  codeql:
