@@ -21,7 +21,10 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: .*\.github/workflows/superlinter\.yml.*
+          FILTER_REGEX_EXCLUDE: |-
+            .*\.github/workflows/superlinter\.yml
+            .*\.github/workflows/release\.yml
+            .*OpenHardwareMonitor/App\.config
           MARKDOWN_FIX_END_OF_FILE: true
           PYTHON_BLACK_CONFIG_FILE: .python-black
           PYTHON_ISORT_CONFIG_FILE: .isort.cfg

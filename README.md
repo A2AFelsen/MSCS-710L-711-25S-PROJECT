@@ -1,6 +1,6 @@
 # Metrics: The Gathering
 
-A github repository for Michael Huffer, Michael Laffan, and Frank Seelmann's MSCS-710L-711-25S-PROJECT.
+A GitHub repository for Michael Huffer, Michael Laffan, and Frank Seelmann's MSCS-710L-711-25S-PROJECT.
 
 [Discord Server](https://discord.gg/Kwb6VZGQYP)
 
@@ -20,7 +20,7 @@ Steps to run OpenHardwareMonitor:
 6. Build the project and run it. The interval for collecting metrics is set for 30 seconds, but can be changed by modifying the timer variable, which is in milliseconds.
 
 
-After cloning the repo and opening the .sln file, Visual Studio sometimes automatically restores NuGet packages when you open a project. If this doesn't happen:
+After cloning the repository and opening the .sln file, Visual Studio sometimes automatically restores NuGet packages when you open a project. If this doesn't happen:
   1. Right-click on the solution in Solution Explorer, e.g. "Solution 'OpenHardwareMonitor' (1 of 1 project)"
   2. Select 'Restore NuGet Packages'
 
