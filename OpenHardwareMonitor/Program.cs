@@ -54,15 +54,22 @@ namespace OpenHardwareMonitor
             computer.Open();
             cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
-            Timer timer = new Timer(30000); // 30-second interval
+            // Create timer but don't start yet
+            System.Timers.Timer timer = new System.Timers.Timer(30000);
             timer.Elapsed += OnTimedEvent;
             timer.AutoReset = true;
+
+            // First collection
+            OnTimedEvent(null, null);
+
+            // Start timer after first collection
             timer.Enabled = true;
 
             Console.WriteLine("Press Enter to exit the program.");
             Console.ReadLine();
 
             timer.Stop();
+            timer.Dispose();
             computer.Close();
             DatabaseHelper.CloseConnection(); // Close the database connection when the program exits
         }

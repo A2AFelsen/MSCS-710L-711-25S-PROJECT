@@ -85,7 +85,8 @@ namespace OpenHardwareMonitor
         public static void InsertComponentStatistic(string serialNumber, DateTime timestamp, string machineState, float temperature, float usage, float? powerConsumption, float? coreSpeed, float? memorySpeed, float totalRam, DateTime endOfLife)
         {
             string insertQuery = @"
-                INSERT INTO component_statistic (serial_number, timestamp, machine_state, temperature, usage, power_consumption, core_speed, memory_speed, total_ram, end_of_life)
+                INSERT OR REPLACE INTO component_statistic
+                (serial_number, timestamp, machine_state, temperature, usage, power_consumption, core_speed, memory_speed, total_ram, end_of_life)
                 VALUES (@serialNumber, @timestamp, @machineState, @temperature, @usage, @powerConsumption, @coreSpeed, @memorySpeed, @totalRam, @endOfLife)";
             using (var command = new SQLiteCommand(insertQuery, dbConnection))
             {
