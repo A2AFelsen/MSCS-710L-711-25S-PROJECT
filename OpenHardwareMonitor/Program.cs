@@ -216,7 +216,7 @@ namespace OpenHardwareMonitor
             }
 
             // If the serial number is not available, generate a deterministic identifier
-            if (serialNumber == "Not Available" || string.IsNullOrWhiteSpace(serialNumber))
+            if (serialNumber == "Not Available" || string.IsNullOrWhiteSpace(serialNumber) || serialNumber == "Default string")
             {
                 serialNumber = GenerateDeterministicSerialNumber(hardware);
             }
