@@ -1,0 +1,121 @@
+Press Enter to exit the program.
+Reading sensor data at 4/1/2025 10:39:53 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:39:53 PM, MachineState=Active, Temperature=0, CPUUsage=8.943756, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:39:53 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:39:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:39:53 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:39:53 PM, MachineState=Active, Temperature=0, CPUUsage=7.265319, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:39:53 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:39:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:39:53 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 55
+Reading sensor data at 4/1/2025 10:40:23 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:40:23 PM, MachineState=Active, Temperature=0, CPUUsage=32.20028, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:23 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:40:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:23 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:40:23 PM, MachineState=Active, Temperature=0, CPUUsage=50.49971, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:23 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:40:23 PM, MachineState=Active, Temperature=0, CPUUsage=6.270069, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:23 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 55
+Reading sensor data at 4/1/2025 10:40:53 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:40:53 PM, MachineState=Active, Temperature=0, CPUUsage=37.91374, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:53 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:40:53 PM, MachineState=Active, Temperature=0, CPUUsage=51.03867, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:53 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:40:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:53 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:40:53 PM, MachineState=Active, Temperature=0, CPUUsage=41.2001, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:40:53 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:41:23 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:41:23 PM, MachineState=Active, Temperature=0, CPUUsage=40.19596, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:23 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:41:23 PM, MachineState=Active, Temperature=0, CPUUsage=4.407356, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:23 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:41:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:23 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:41:23 PM, MachineState=Active, Temperature=0, CPUUsage=23.71035, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:23 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:41:53 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:41:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:53 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:41:53 PM, MachineState=Active, Temperature=0, CPUUsage=59.7431, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:53 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:41:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:53 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:41:53 PM, MachineState=Active, Temperature=0, CPUUsage=16.21468, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:41:53 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:42:23 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:42:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:23 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:42:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:23 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:42:23 PM, MachineState=Active, Temperature=0, CPUUsage=27.56411, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:23 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:42:23 PM, MachineState=Active, Temperature=0, CPUUsage=66.98, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:23 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:42:53 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:42:53 PM, MachineState=Active, Temperature=0, CPUUsage=29.57363, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:53 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:42:53 PM, MachineState=Active, Temperature=0, CPUUsage=3.325414, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:53 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:42:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:53 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:42:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:42:53 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:43:23 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:43:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:23 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:43:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:23 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:43:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:23 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:43:23 PM, MachineState=Active, Temperature=0, CPUUsage=3.664732, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:23 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:43:53 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:43:53 PM, MachineState=Active, Temperature=0, CPUUsage=10.64106, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:53 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:43:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:53 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:43:53 PM, MachineState=Active, Temperature=0, CPUUsage=7.322923, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:53 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:43:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:43:53 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:44:23 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:44:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:23 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:44:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:23 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:44:23 PM, MachineState=Active, Temperature=0, CPUUsage=22.32077, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:23 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:44:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:23 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:44:53 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:44:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:53 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:44:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:53 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:44:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:53 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:44:53 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:44:53 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
+Reading sensor data at 4/1/2025 10:45:23 PM
+Component Statistic: SerialNumber=240943272200371, Timestamp=4/1/2025 10:45:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:45:23 PM
+Component: SerialNumber=240943272200371, DeviceType=Mainboard, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=0
+Component Statistic: SerialNumber=178BFBFF00B40F40, Timestamp=4/1/2025 10:45:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:45:23 PM
+Component: SerialNumber=178BFBFF00B40F40, DeviceType=CPU, VRAM=0, StockCoreSpeed=4.7, StockMemorySpeed=0
+Component Statistic: SerialNumber=B65632F4, Timestamp=4/1/2025 10:45:23 PM, MachineState=Active, Temperature=0, CPUUsage=0, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:45:23 PM
+Component: SerialNumber=B65632F4, DeviceType=RAM, VRAM=0, StockCoreSpeed=0, StockMemorySpeed=4800
+Component Statistic: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, Timestamp=4/1/2025 10:45:23 PM, MachineState=Active, Temperature=0, CPUUsage=53.51533, PowerConsumption=0, CoreSpeed=0, MemorySpeed=0, TotalRAM=61.64005, EndOfLife=4/1/2026 10:45:23 PM
+Component: SerialNumber=PCI\VEN_1002&DEV_13C0&SUBSYS_88771043&REV_CB\4&1EBE6A9C&0&0041, DeviceType=GpuAti, VRAM=0, StockCoreSpeed=1200, StockMemorySpeed=7000
+  Temperature Sensor Found: GPU Core, Value: 56
