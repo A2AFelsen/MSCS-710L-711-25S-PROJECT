@@ -29,7 +29,10 @@ def known_data():
 
 
 def random_data():
-    random_list = [[f"DATE: {str(i)}", random.randint(1, 100)] for i in range(random.randint(5, 20))]
+    random_list = [
+        [f"DATE: {str(i)}", random.randint(1, 100)]
+        for i in range(random.randint(5, 20))
+    ]
     return random_list
 
 
@@ -39,7 +42,7 @@ def generate_datasets():
         "GPU1": random_data(),
         "DIMM": random_data(),
         "CPU": random_data(),
-        "Power Supply": random_data()
+        "Power Supply": random_data(),
     }
 
     return datasets

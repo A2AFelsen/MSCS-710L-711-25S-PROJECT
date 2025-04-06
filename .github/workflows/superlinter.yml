@@ -21,6 +21,7 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_IGNORE_PATHS: "OpenHardwareMonitor/App.config"
           FILTER_REGEX_EXCLUDE: |-
             .*\.github/workflows/superlinter\.yml
             .*\.github/workflows/release\.yml
