@@ -19,7 +19,7 @@ jobs:
 
       - name: Get current date
         id: date
-        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+        run: echo "date=$(date +'%Y.%m.%d')" >> "$GITHUB_OUTPUT"
 
       - name: Download .NET 4.8 Artifact
         uses: dawidd6/action-download-artifact@v6
