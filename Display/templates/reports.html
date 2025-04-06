@@ -93,15 +93,15 @@
         <form style="padding: 0 20px;">
             <label for="num1">Start Date:</label>
             <select name="num1" id="num1">
-                {% for i in range(max_datapoints + 1 ) %}
+                {% for i in range(max_datapoints) %}
                     <option value="{{ i }}">{{ i }}</option>
                 {% endfor %}
             </select>
 
             <label for="num2">End Date:</label>
             <select name="num2" id="num2">
-                {% for i in range(max_datapoints + 1) %}
-                    <option value="{{ i }}" {% if i == max_datapoints %}selected{% endif %}>{{ i }}</option>
+                {% for i in range(max_datapoints) %}
+                    <option value="{{ i }}" {% if i == max_datapoints-1 %}selected{% endif %}>{{ i }}</option>
                 {% endfor %}
             </select>
         </form>
