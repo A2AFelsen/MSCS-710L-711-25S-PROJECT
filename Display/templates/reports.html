@@ -88,24 +88,24 @@
                 <option value="28">Colossal</option>
             </select>
         </div>
-    </div>
 
     <!-- Start and End Date Selection -->
-    <form style="padding: 0 20px;">
-        <label for="num1">Start Date:</label>
-        <select name="num1" id="num1">
-            {% for i in range(max_datapoints + 1 ) %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select>
+        <form style="padding: 0 20px;">
+            <label for="num1">Start Date:</label>
+            <select name="num1" id="num1">
+                {% for i in range(max_datapoints + 1 ) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
 
-        <label for="num2">End Date:</label>
-        <select name="num2" id="num2">
-            {% for i in range(max_datapoints + 1) %}
-                <option value="{{ i }}" {% if i == max_datapoints %}selected{% endif %}>{{ i }}</option>
-            {% endfor %}
-        </select>
-    </form>
+            <label for="num2">End Date:</label>
+            <select name="num2" id="num2">
+                {% for i in range(max_datapoints + 1) %}
+                    <option value="{{ i }}" {% if i == max_datapoints %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
 
     <!-- Quadrants -->
     <div class="quadrant-container">
@@ -148,7 +148,7 @@
                 data: {
                     labels: generateLabels(datasetName, start, end),
                     datasets: [{
-                        label: `${datasetName} - Column ${columnIndex}`,
+                        label: "",
                         data: dataPoints,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
@@ -161,18 +161,10 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: {
-                                font: {
-                                    size: fontSize
-                                }
-                            }
+                            display: false
                         },
                         title: {
-                            display: true,
-                            text: chartId,
-                            font: {
-                                size: fontSize + 2
-                            }
+                            display: false
                         }
                     },
                     scales: {
