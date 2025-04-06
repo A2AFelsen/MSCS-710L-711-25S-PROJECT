@@ -29,15 +29,24 @@ def check_db(db):
 def read_metrics(db="metrics.db"):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
-    output = cursor.execute(
-        "SELECT serial_number, timestamp, usage, total_ram FROM 'component_statistic'"
-    ).fetchall()
+    output = cursor.execute("""
+        SELECT t1.serial_number, t1.timestamp, t1.usage, t1.total_ram, t2.device_type
+        FROM 'component_statistic' t1 
+        JOIN 'component' t2 
+        ON t1.serial_number = t2.serial_number
+    """).fetchall()
 
     component_dict = {}
     for entry in output:
-        if entry[0] not in component_dict:
-            component_dict[entry[0]] = []
-        component_dict[entry[0]].append(
-            [entry[1].split(".")[0], entry[2], entry[3], random.randint(1, 100)]
-        )
+        serial_number = entry[0]
+        timestamp     = entry[1]
+        usage         = entry[2]
+        total_ram     = entry[3]
+        device_type   = entry[4]
+        key   = f"{serial_number} ({device_type})"
+        value = [timestamp, usage, total_ram, random.randint(1, 100)]
+        if key not in component_dict:
+            component_dict[key] = []
+        component_dict[key].append(value)
     return component_dict
+
