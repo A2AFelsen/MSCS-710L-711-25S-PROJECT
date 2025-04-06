@@ -10,7 +10,7 @@ namespace OpenHardwareMonitor
 {
     class Program
     {
-        private static Computer computer;
+        private static Computer Computer;
         private static PerformanceCounter cpuCounter;
 
         static void Main(string[] args)
@@ -41,7 +41,7 @@ namespace OpenHardwareMonitor
             // Initialize the database if it doesn't already exist
             DatabaseHelper.InitializeDatabase();
 
-            computer = new Computer
+            Computer = new Computer
             {
                 CPUEnabled = true,
                 GPUEnabled = true,
@@ -51,11 +51,11 @@ namespace OpenHardwareMonitor
                 MainboardEnabled = true
             };
 
-            computer.Open();
+            Computer.Open();
             cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             // Create timer but don't start yet
-            System.Timers.Timer timer = new System.Timers.Timer(30000);
+            Timer timer = new Timer(30000);
             timer.Elapsed += OnTimedEvent;
             timer.AutoReset = true;
 
@@ -70,121 +70,160 @@ namespace OpenHardwareMonitor
 
             timer.Stop();
             timer.Dispose();
-            computer.Close();
-            DatabaseHelper.CloseConnection(); // Close the database connection when the program exits
+            Computer.Close();
+            DatabaseHelper.CloseConnection();
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             DateTime timestamp = DateTime.Now;
-            Console.WriteLine($"Reading sensor data at {timestamp}");
+            Console.WriteLine($"\n=== Reading sensor data at {timestamp} ===");
+
+            string serialNumber;
+            string deviceType;
+            float temperature;
+            float powerConsumption;
+            float load;
+            float currentCoreClock;
+            float currentMemoryClock;
 
             // Collect data for component_statistic and component tables
-            foreach (var hardwareItem in computer.Hardware)
+            foreach (var hardwareItem in Computer.Hardware)
             {
                 hardwareItem.Update();
 
-                string serialNumber = GetHardwareSerialNumber(hardwareItem);
-                string deviceType = hardwareItem.HardwareType.ToString();
-                float temperature = 0;
-                float powerConsumption = 0;
-                float coreSpeed = 0;
-                float memorySpeed = 0;
+                serialNumber = GetHardwareSerialNumber(hardwareItem);
+                deviceType = hardwareItem.HardwareType.ToString();
+                temperature = 0;
+                powerConsumption = 0;
+                load = 0;
+                currentCoreClock = 0;
+                currentMemoryClock = 0;
+                
                 int vRam = 0;
                 float stockCoreSpeed = 0;
                 float stockMemorySpeed = 0;
 
-                // Get stock core and memory speeds based on hardware type
+                // Get stock speeds based on hardware type
                 switch (hardwareItem.HardwareType)
                 {
                     case HardwareType.CPU:
-                        stockCoreSpeed = GetCpuBaseClockSpeed(); // Fetch CPU base clock speed
+                        stockCoreSpeed = GetCpuBaseClockSpeed();
                         break;
                     case HardwareType.GpuNvidia:
                     case HardwareType.GpuAti:
-                        (stockCoreSpeed, stockMemorySpeed) = GetGpuBaseClockSpeeds(); // Fetch GPU base clock and memory speeds
+                        (stockCoreSpeed, stockMemorySpeed) = GetGpuBaseClockSpeeds();
                         break;
                     case HardwareType.RAM:
-                        stockMemorySpeed = GetRamSpeed(); // Fetch RAM speed
-                        break;
-                    default:
-                        // For other hardware types, set default values or skip
+                        stockMemorySpeed = GetRamSpeed();
                         break;
                 }
 
+                // Process all sensors for this hardware
+                Console.WriteLine($"\n{hardwareItem.Name} ({hardwareItem.HardwareType})");
                 foreach (var sensor in hardwareItem.Sensors)
                 {
-                    if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+                    if (!sensor.Value.HasValue) continue;
+
+                    // Temperature monitoring
+                    if (sensor.SensorType == SensorType.Temperature)
                     {
-                        Console.WriteLine($"  Temperature Sensor Found: {sensor.Name}, Value: {sensor.Value}");
                         temperature = sensor.Value.Value;
+                        Console.WriteLine($"  Temperature: {sensor.Name} = {temperature}°C");
                     }
-                    else if (sensor.SensorType == SensorType.Power && sensor.Value.HasValue)
+                    // Power monitoring
+                    else if (sensor.SensorType == SensorType.Power)
                     {
                         powerConsumption = sensor.Value.Value;
+                        Console.WriteLine($"  Power: {sensor.Name} = {powerConsumption}W");
                     }
-                    else if (sensor.SensorType == SensorType.Clock && sensor.Value.HasValue)
+                    // Load monitoring
+                    else if (sensor.SensorType == SensorType.Load)
                     {
-                        if (hardwareItem.HardwareType == HardwareType.CPU)
-                        {
-                            coreSpeed = sensor.Value.Value;
-                        }
-                        else if (hardwareItem.HardwareType == HardwareType.GpuNvidia || hardwareItem.HardwareType == HardwareType.GpuAti)
-                        {
-                            memorySpeed = sensor.Value.Value;
-                        }
+                        load = sensor.Value.Value;
+                        Console.WriteLine($"  Load: {sensor.Name} = {load}%");
                     }
-                    else if (sensor.SensorType == SensorType.Data && sensor.Value.HasValue)
+                    // Clock monitoring
+                    else if (sensor.SensorType == SensorType.Clock)
                     {
-                        if (sensor.Name.Contains("GPU Memory"))
+                        if (sensor.Name.Contains("Core") || sensor.Name.Contains("GPU Core"))
                         {
-                            vRam = (int)sensor.Value.Value;
+                            currentCoreClock = sensor.Value.Value;
+                        }
+                        else if (sensor.Name.Contains("Memory") || sensor.Name.Contains("GPU Memory"))
+                        {
+                            currentMemoryClock = sensor.Value.Value;
                         }
                     }
+                    // VRAM monitoring
+                    else if (sensor.SensorType == SensorType.Data && sensor.Name.Contains("GPU Memory"))
+                    {
+                        vRam = (int)sensor.Value.Value;
+                        Console.WriteLine($"  VRAM: {vRam} MB");
+                    }
+                     // Insert or update component data
+                    if (!DatabaseHelper.ComponentExists(serialNumber))
+                    {
+                        DatabaseHelper.InsertComponent(
+                            serialNumber,
+                            deviceType,
+                            vRam,
+                            stockCoreSpeed,
+                            stockMemorySpeed
+                        );
+                    }
+                    // Insert component statistics
+                    DatabaseHelper.InsertComponentStatistic(
+                        serialNumber,
+                        timestamp,
+                        "Active",
+                        temperature,
+                        load,
+                        powerConsumption,
+                        currentCoreClock,
+                        currentMemoryClock,
+                        GetTotalRAM(),
+                        timestamp.AddYears(1)
+                    );
                 }
-
-                // Check if the component already exists in the database
-                if (!DatabaseHelper.ComponentExists(serialNumber))
-                {
-                    // Insert component data into the database if it doesn't exist
-                    DatabaseHelper.InsertComponent(serialNumber, deviceType, vRam, stockCoreSpeed, stockMemorySpeed);
-                }
-
-                // Insert component_statistic data into the database
-                DatabaseHelper.InsertComponentStatistic(
-                    serialNumber, // Use the same serial number for consistency
-                    timestamp,
-                    "Active", // Machine state (e.g., "Active")
-                    temperature,
-                    cpuCounter.NextValue(), // CPU usage
-                    powerConsumption,
-                    coreSpeed,
-                    memorySpeed,
-                    GetTotalRAM(), // Total RAM in GB
-                    timestamp.AddYears(1) // End of life (1 year from now)
-                );
-
-                Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, CPUUsage={cpuCounter.NextValue()}, PowerConsumption={powerConsumption}, CoreSpeed={coreSpeed}, MemorySpeed={memorySpeed}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
+                Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, load={load}, PowerConsumption={powerConsumption}, CoreSpeed={currentCoreClock}, MemorySpeed={currentMemoryClock}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
                 Console.WriteLine($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
             }
 
-            // Collect data for process table
+
+
+            // Process monitoring
+            Console.WriteLine("\nProcess Monitoring:");
             Process[] processes = Process.GetProcesses();
+            var currentProcessCpuUsage = new Dictionary<int, (TimeSpan cpuTime, DateTime timestamp)>();
             foreach (Process process in processes)
             {
                 try
                 {
-                    int pid = process.Id;
-                    float processCpuUsage = cpuCounter.NextValue();
-                    float memoryUsage = process.WorkingSet64 / 1024f / 1024f; // Convert to MB
-                    DateTime processEndOfLife = timestamp.AddYears(1);
+                    float cpuUsage = 0;
 
-                    DatabaseHelper.InsertProcess(pid, timestamp, processCpuUsage, memoryUsage, processEndOfLife);
-                    Console.WriteLine($"Process: PID={pid}, Timestamp={timestamp}, CPUUsage={processCpuUsage}, MemoryUsage={memoryUsage}, EndOfLife={processEndOfLife}");
+                    using (var searcher = new ManagementObjectSearcher("SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfProc_Process WHERE Name='" + process.ProcessName + "'"))
+                    {
+                        foreach (var result in searcher.Get())
+                        {
+                            cpuUsage = float.Parse(result["PercentProcessorTime"].ToString());
+                        }
+                    }
+                    float memoryUsage = process.WorkingSet64 / 1024f / 1024f; // MB
+
+                    DatabaseHelper.InsertProcess(
+                        process.Id,
+                        timestamp,
+                        cpuUsage,
+                        memoryUsage,
+                        timestamp.AddYears(1)
+                    );
+
+                    Console.WriteLine($"  PID {process.Id}: CPU={cpuUsage}%, RAM={memoryUsage}MB");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error accessing process {process.ProcessName}: {ex.Message}");
+                    Console.WriteLine($"  Error accessing process {process.ProcessName}: {ex.Message}");
                 }
             }
         }
@@ -215,8 +254,7 @@ namespace OpenHardwareMonitor
                     break;
             }
 
-            // If the serial number is not available, generate a deterministic identifier
-            if (serialNumber == "Not Available" || string.IsNullOrWhiteSpace(serialNumber) || serialNumber == "Default string")
+            if (string.IsNullOrWhiteSpace(serialNumber) || serialNumber == "Not Available" || serialNumber == "Default string")
             {
                 serialNumber = GenerateDeterministicSerialNumber(hardware);
             }
@@ -226,34 +264,29 @@ namespace OpenHardwareMonitor
 
         private static string GenerateDeterministicSerialNumber(IHardware hardware)
         {
-            // Use a combination of hardware properties to create a consistent identifier
-            string identifier = $"{hardware.HardwareType}-{hardware.Name}";
-
-            // Hash the identifier to ensure it's a consistent length and format
+            string identifier = $"{hardware.HardwareType}-{hardware.Name}-{hardware.Identifier}";
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
                 byte[] hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(identifier));
-                return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 16); // Use first 16 chars of hash
+                return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 16);
             }
         }
 
         private static float GetTotalRAM()
         {
-            float totalRam = 0;
             try
             {
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
                 foreach (ManagementObject obj in searcher.Get())
                 {
-                    ulong totalMemoryKB = Convert.ToUInt64(obj["TotalVisibleMemorySize"]);
-                    totalRam = totalMemoryKB / 1024f / 1024f; // Convert KB to GB
+                    return Convert.ToUInt64(obj["TotalVisibleMemorySize"]) / 1024f / 1024f;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving RAM information: {ex.Message}");
             }
-            return totalRam;
+            return 0;
         }
 
         private static string GetWMISerialNumber(string wmiClass, string propertyName)
@@ -280,20 +313,20 @@ namespace OpenHardwareMonitor
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT MaxClockSpeed FROM Win32_Processor");
                 foreach (ManagementObject obj in searcher.Get())
                 {
-                    return Convert.ToSingle(obj["MaxClockSpeed"]) / 1000f; // Convert MHz to GHz
+                    return Convert.ToSingle(obj["MaxClockSpeed"]) / 1000f;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving CPU base clock speed: {ex.Message}");
             }
-            return 0; // Default value if retrieval fails
+            return 0;
         }
 
         private static (float coreSpeed, float memorySpeed) GetGpuBaseClockSpeeds()
         {
-            // Example: Use predefined values or fetch from a library like NVAPI/ADL
-            return (1200f, 7000f); // Placeholder values
+            // These values could be fetched from GPU-specific APIs for more accuracy
+            return (1200f, 7000f); // Default values for most mid-range GPUs
         }
 
         private static float GetRamSpeed()
@@ -303,14 +336,14 @@ namespace OpenHardwareMonitor
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Speed FROM Win32_PhysicalMemory");
                 foreach (ManagementObject obj in searcher.Get())
                 {
-                    return Convert.ToSingle(obj["Speed"]); // Speed in MHz
+                    return Convert.ToSingle(obj["Speed"]);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving RAM speed: {ex.Message}");
             }
-            return 0; // Default value if retrieval fails
+            return 0;
         }
 
         private static bool IsRunningAsAdministrator()
