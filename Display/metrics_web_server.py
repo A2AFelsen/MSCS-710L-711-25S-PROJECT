@@ -4,20 +4,18 @@
 #                                                                                         #
 # v0.0.1 Initial version. Mostly a skeleton.                                              #
 # v0.1.0 Can now pull data from the interface script and pass it to the user_report page  #
+# v0.1.1 Removing unnecessary imports as well as socketio since we don't need to talk to  #
+#        other instances.                                                                 #
 ###########################################################################################
 # TODO:                                                                                   #
 ###########################################################################################
 
-import subprocess as sp
-
 import read_database
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template
 from web_server_database_interface import generate_datasets
 
-# Set up the Flask instance as well as the socket IO
+# Set up the Flask instance
 app = Flask(__name__)
-socketio = SocketIO(app)
 
 
 # index.html is the standard default case.
@@ -42,4 +40,4 @@ def user_report():
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, host="127.0.0.1")
+    app.run(debug=True, host="127.0.0.1")
