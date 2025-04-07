@@ -79,27 +79,18 @@ namespace OpenHardwareMonitor
             DateTime timestamp = DateTime.Now;
             Console.WriteLine($"\n=== Reading sensor data at {timestamp} ===");
 
-            string serialNumber;
-            string deviceType;
-            float temperature;
-            float powerConsumption;
-            float load;
-            float currentCoreClock;
-            float currentMemoryClock;
-
             // Collect data for component_statistic and component tables
             foreach (var hardwareItem in Computer.Hardware)
             {
                 hardwareItem.Update();
 
-                serialNumber = GetHardwareSerialNumber(hardwareItem);
-                deviceType = hardwareItem.HardwareType.ToString();
-                temperature = 0;
-                powerConsumption = 0;
-                load = 0;
-                currentCoreClock = 0;
-                currentMemoryClock = 0;
-                
+                string serialNumber = GetHardwareSerialNumber(hardwareItem);
+                string deviceType = hardwareItem.HardwareType.ToString();
+                float temperature = 0;
+                float powerConsumption = 0;
+                float load = 0;
+                float currentCoreClock = 0;
+                float currentMemoryClock = 0;
                 int vRam = 0;
                 float stockCoreSpeed = 0;
                 float stockMemorySpeed = 0;
@@ -122,8 +113,7 @@ namespace OpenHardwareMonitor
                 // Process all sensors for this hardware
                 Console.WriteLine($"\n{hardwareItem.Name} ({hardwareItem.HardwareType})");
                 foreach (var sensor in hardwareItem.Sensors)
-                {
-                    if (!sensor.Value.HasValue) continue;
+                { 
 
                     // Temperature monitoring
                     if (sensor.SensorType == SensorType.Temperature)
@@ -161,31 +151,36 @@ namespace OpenHardwareMonitor
                         vRam = (int)sensor.Value.Value;
                         Console.WriteLine($"  VRAM: {vRam} MB");
                     }
-                     // Insert or update component data
-                    if (!DatabaseHelper.ComponentExists(serialNumber))
-                    {
-                        DatabaseHelper.InsertComponent(
-                            serialNumber,
-                            deviceType,
-                            vRam,
-                            stockCoreSpeed,
-                            stockMemorySpeed
-                        );
-                    }
-                    // Insert component statistics
-                    DatabaseHelper.InsertComponentStatistic(
+                }
+
+                // Insert or update component data
+                if (!DatabaseHelper.ComponentExists(serialNumber))
+                {
+                    DatabaseHelper.InsertComponent(
                         serialNumber,
-                        timestamp,
-                        "Active",
-                        temperature,
-                        load,
-                        powerConsumption,
-                        currentCoreClock,
-                        currentMemoryClock,
-                        GetTotalRAM(),
-                        timestamp.AddYears(1)
+                        deviceType,
+                        vRam,
+                        stockCoreSpeed,
+                        stockMemorySpeed
                     );
                 }
+
+
+                // Insert component statistics
+                DatabaseHelper.InsertComponentStatistic(
+                    serialNumber,
+                    timestamp,
+                    "Active",
+                    temperature,
+                    load,
+                    powerConsumption,
+                    currentCoreClock,
+                    currentMemoryClock,
+                    GetTotalRAM(),
+                    timestamp.AddYears(1)
+                );
+
+
                 Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, load={load}, PowerConsumption={powerConsumption}, CoreSpeed={currentCoreClock}, MemorySpeed={currentMemoryClock}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
                 Console.WriteLine($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
             }
