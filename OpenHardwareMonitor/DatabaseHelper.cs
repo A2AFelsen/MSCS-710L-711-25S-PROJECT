@@ -4,7 +4,7 @@ using System.Data.SQLite; // If this is not working, install SQLite via "NuGet" 
 
 namespace OpenHardwareMonitor
 {
-    static class DatabaseHelper
+    internal static class DatabaseHelper
     {
         private static SQLiteConnection dbConnection;
         private static readonly object _lock = new object();
