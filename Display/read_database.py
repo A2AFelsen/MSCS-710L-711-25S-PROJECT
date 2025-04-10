@@ -50,3 +50,9 @@ def read_metrics(db="metrics.db"):
         component_dict[key].append(value)
     return component_dict
 
+
+def read_processes(db="metrics.db"):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    output = cursor.execute("SELECT pid, timestamp, cpu_usage, memory_usage FROM process ORDER BY pid").fetchall()
+    return output

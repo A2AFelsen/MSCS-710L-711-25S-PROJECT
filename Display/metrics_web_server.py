@@ -38,6 +38,13 @@ def user_report():
         "reports.html", datasets=datasets, max_datapoints=max_datapoints
     )
 
+@app.route("/proc_table", methods=["POST"])
+def proc_table():
+    data = read_database.read_processes()
+    return render_template(
+        "processes.html", data=data
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1")
