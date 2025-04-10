@@ -4,43 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Table</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
     <style>
+        .table-wrapper {
+            width: 80%;
+            margin: 50px auto;
+            overflow-x: auto;
+        }
+
         table {
             border-collapse: collapse;
-            width: 60%;
-            margin: 20px auto;
+            width: 100%;
         }
+
         th, td {
             border: 1px solid #999;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
         }
+
         th {
-            background-color: #f4f4f4;
+            background-color: #bbb;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-<h2 style="text-align:center;">MTG Process Table</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>PID</th>
-                <th>Time Stamp</th>
-                <th>CPU Usage</th>
-                <th>Memory Usage</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in data %}
-            <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2 style="text-align:center;">MTG Process Table</h2>
+
+    <div class="table-wrapper">
+        <table id="data-table" class="display">
+            <thead>
+                <tr>
+                    <th>PID</th>
+                    <th>Time Stamp</th>
+                    <th>CPU Usage</th>
+                    <th>Memory Usage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#data-table').DataTable();
+        });
+    </script>
 </body>
 </html>
