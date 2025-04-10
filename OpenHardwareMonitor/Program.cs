@@ -87,7 +87,7 @@ namespace OpenHardwareMonitor
                 cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
                 // Create timer but don't start yet
-                Timer timer = new Timer(5000);
+                Timer timer = new Timer(3000);
                 timer.Elapsed += OnTimedEvent;
                 timer.AutoReset = true;
 
@@ -241,39 +241,42 @@ namespace OpenHardwareMonitor
                 //var currentProcessCpuUsage = new Dictionary<int, (TimeSpan cpuTime, DateTime timestamp)>(); <- unused?
                 foreach (Process process in processes)
                 {
-                    try
+                    if (process.Id != 0)
                     {
-                        float cpuUsage = 0;
-
-                        using (var searcher = new ManagementObjectSearcher("SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfProc_Process WHERE Name='" + process.ProcessName + "'"))
-                        {
-                            foreach (var result in searcher.Get())
-                            {
-                                cpuUsage = float.Parse(result["PercentProcessorTime"].ToString());
-                            }
-                        }
-                        float memoryUsage = process.WorkingSet64 / 1024f / 1024f; // MB
-
                         try
                         {
-                            DatabaseHelper.InsertProcess(
-                                process.Id,
-                                timestamp,
-                                cpuUsage,
-                                memoryUsage,
-                                timestamp.AddYears(1)
-                            );
+                            float cpuUsage = 0;
 
-                            Console.WriteLine($"  PID {process.Id}: CPU={cpuUsage}%, RAM={memoryUsage}MB");
+                            using (var searcher = new ManagementObjectSearcher("SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfProc_Process WHERE Name='" + process.ProcessName + "'"))
+                            {
+                                foreach (var result in searcher.Get())
+                                {
+                                    cpuUsage = float.Parse(result["PercentProcessorTime"].ToString());
+                                }
+                            }
+                            float memoryUsage = process.WorkingSet64 / 1024f / 1024f; // MB
+
+                            try
+                            {
+                                DatabaseHelper.InsertProcess(
+                                    process.Id,
+                                    timestamp,
+                                    cpuUsage,
+                                    memoryUsage,
+                                    timestamp.AddYears(1)
+                                );
+
+                                Console.WriteLine($"  PID {process.Id}: CPU={cpuUsage}%, RAM={memoryUsage}MB");
+                            }
+                            catch (DatabaseOperationException ex)
+                            {
+                                Console.WriteLine($"  Failed to insert process {process.ProcessName} (PID: {process.Id}): {ex.Message}");
+                            }
                         }
-                        catch (DatabaseOperationException ex)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine($"  Failed to insert process {process.ProcessName} (PID: {process.Id}): {ex.Message}");
+                            Console.WriteLine($"  Error accessing process {process.ProcessName}: {ex.Message}");
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"  Error accessing process {process.ProcessName}: {ex.Message}");
                     }
                 }
             }
