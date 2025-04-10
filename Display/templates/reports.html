@@ -72,10 +72,13 @@
 <body>
 
     <div class="top-bar">
-<button class="return-button" onclick="window.location.href='/'">Return</button>
-    <form action="/user_report" method="post" style="display:inline;">
-        <button>Reload</button>
-    </form>
+        <button class="return-button" onclick="window.location.href='/'">Home</button>
+        <form action="/user_report" method="post" style="display:inline;">
+            <button>Reload</button>
+        </form>
+        <form action="/proc_table" method="post" style="display:inline;">
+            <button>Processes</button>
+        </form>
 
         <!-- Font Size Selector -->
         <div class="font-select-wrapper">
@@ -89,7 +92,7 @@
             </select>
         </div>
 
-    <!-- Start and End Date Selection -->
+        <!-- Start and End Date Selection -->
         <form style="padding: 0 20px;">
             <label for="num1">Start Date:</label>
             <select name="num1" id="num1">
