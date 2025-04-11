@@ -34,13 +34,13 @@ namespace OpenHardwareMonitor
                             serial_number VARCHAR(128),
                             timestamp DATETIME,
                             machine_state TEXT NOT NULL,
-                            temperature REAL,
-                            usage REAL,
+                            temperature REAL NOT NULL,
+                            usage REAL NOT NULL,
                             power_consumption REAL,
                             core_speed REAL,
                             memory_speed REAL,
                             total_ram REAL,
-                            end_of_life DATETIME,
+                            end_of_life DATETIME NOT NULL,
                             PRIMARY KEY (serial_number, timestamp),
                             FOREIGN KEY (serial_number) REFERENCES component(serial_number)
                         );");
@@ -50,9 +50,9 @@ namespace OpenHardwareMonitor
                         CREATE TABLE IF NOT EXISTS process (
                             pid INTEGER,
                             timestamp DATETIME,
-                            cpu_usage REAL,
-                            memory_usage REAL,
-                            end_of_life DATETIME,
+                            cpu_usage REAL NOT NULL,
+                            memory_usage REAL NOT NULL,
+                            end_of_life DATETIME NOT NULL,
                             PRIMARY KEY (pid, timestamp)
                         );");
                 }
