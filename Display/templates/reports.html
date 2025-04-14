@@ -144,12 +144,22 @@
 
         function createChart(chartId, datasetName, columnIndex = 1, start = 0, end = chartData[datasetName].length - 1, fontSize = 16) {
             const ctx = document.getElementById(chartId).getContext('2d');
-            const dataPoints = chartData[datasetName].slice(start, end + 1).map(item => item[columnIndex]);
+
+            const rawData = chartData[datasetName].slice(start, end + 1);
+
+            // Filter out invalid (non-numeric) points
+            const filtered = rawData.filter(item => {
+                const val = item[columnIndex];
+                return typeof val === 'number' && isFinite(val);
+            });
+
+            const labels = filtered.map(item => item[0]);
+            const dataPoints = filtered.map(item => item[columnIndex]);
 
             return new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: generateLabels(datasetName, start, end),
+                    labels: labels,
                     datasets: [{
                         label: "",
                         data: dataPoints,
