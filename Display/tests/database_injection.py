@@ -36,6 +36,7 @@ class BaseTestCase(unittest.TestCase):
         print()
 
     def test_component_integrity(self):
+        print(f"    Running: Test Component Integrity on {self.db_name}")
         table = "component"
         cursor = self.conn.cursor()
         values = cursor.execute(f"SELECT * FROM {table}").fetchone()
@@ -44,6 +45,7 @@ class BaseTestCase(unittest.TestCase):
             cursor.execute(f"INSERT INTO {table} VALUES {values}")
 
     def test_component_statistic_integrity(self):
+        print(f"    Running: Test Component_Statistic Integrity on {self.db_name}")
         table = "component_statistic"
         cursor = self.conn.cursor()
         values = cursor.execute(f"SELECT * FROM {table}").fetchone()
@@ -52,6 +54,7 @@ class BaseTestCase(unittest.TestCase):
             cursor.execute(f"INSERT INTO {table} VALUES {values}")
 
     def test_process_integrity(self):
+        print(f"    Running: Test Process Integrity on {self.db_name}")
         table = "process"
         cursor = self.conn.cursor()
         values = cursor.execute(f"SELECT * FROM {table}").fetchone()
@@ -60,22 +63,64 @@ class BaseTestCase(unittest.TestCase):
             cursor.execute(f"INSERT INTO {table} VALUES {values}")
 
     def test_component_null(self):
+        print(f"    Running: Test Component Null on {self.db_name}")
         table = "component"
         cursor = self.conn.cursor()
         with self.assertRaises(sqlite3.IntegrityError):
             cursor.execute(f"INSERT INTO {table} (serial_number, v_ram) VALUES (?, ?)", ("null_cpu", 0))
 
     def test_component_statistic_null(self):
+        print(f"    Running: Test Component_Statistic Null on {self.db_name}")
         table = "component_statistic"
         cursor = self.conn.cursor()
         with self.assertRaises(sqlite3.IntegrityError):
             cursor.execute(f"INSERT INTO {table} (serial_number, timestamp) VALUES (?, ?)", ("null_cpu", "today"))
 
     def test_process_null(self):
+        print(f"    Running: Test Process Null on {self.db_name}")
         table = "process"
         cursor = self.conn.cursor()
         with self.assertRaises(sqlite3.IntegrityError):
             cursor.execute(f"INSERT INTO {table} (pid, timestamp) VALUES (?, ?)", (1, "today"))
+
+    def test_component_emoji(self):
+        print(f"    Running: Test Component Emoji on {self.db_name}")
+        table = "component"
+        cursor = self.conn.cursor()
+
+        init_len = len(cursor.execute(f"SELECT * FROM {table}").fetchall())
+
+        new_entry = ("🔧", "💡", "✅", "😄", "🔍")
+        cursor.execute(f"INSERT INTO {table} VALUES {new_entry}")
+        new_len = len(cursor.execute(f"SELECT * FROM {table}").fetchall())
+
+        self.assertEqual(init_len + 1, new_len)
+
+    def test_component_statistic_emoji(self):
+        print(f"    Running: Test Component_Statistic Emoji on {self.db_name}")
+        table = "component_statistic"
+        cursor = self.conn.cursor()
+
+        init_len = len(cursor.execute(f"SELECT * FROM {table}").fetchall())
+
+        new_entry = ("🔧", "💡", "✅", "😄", "🔍", "🔧", "💡", "✅", "😄", "🔍")
+        cursor.execute(f"INSERT INTO {table} VALUES {new_entry}")
+        new_len = len(cursor.execute(f"SELECT * FROM {table}").fetchall())
+
+        self.assertEqual(init_len + 1, new_len)
+
+    def test_process_emoji(self):
+        print(f"    Running: Test Process Emoji on {self.db_name}")
+        table = "process"
+        cursor = self.conn.cursor()
+
+        init_len = len(cursor.execute(f"SELECT * FROM {table}").fetchall())
+
+        new_entry = ("🔧", "💡", "✅", "😄", "🔍")
+        cursor.execute(f"INSERT INTO {table} VALUES {new_entry}")
+        new_len = len(cursor.execute(f"SELECT * FROM {table}").fetchall())
+
+        self.assertEqual(init_len + 1, new_len)
 
 
 def load_tests(loader, tests, pattern):
