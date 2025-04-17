@@ -41,7 +41,7 @@ class BaseTestCase(unittest.TestCase):
         values = cursor.execute(f"SELECT * FROM {table}").fetchone()
 
         with self.assertRaises(sqlite3.IntegrityError):
-            database_setup.inject_values(self.conn, table, values)
+            cursor.execute(f"INSERT INTO {table} VALUES {values}")
 
     def test_component_statistic_integrity(self):
         table = "component_statistic"
@@ -49,7 +49,7 @@ class BaseTestCase(unittest.TestCase):
         values = cursor.execute(f"SELECT * FROM {table}").fetchone()
 
         with self.assertRaises(sqlite3.IntegrityError):
-            database_setup.inject_values(self.conn, table, values)
+            cursor.execute(f"INSERT INTO {table} VALUES {values}")
 
     def test_process_integrity(self):
         table = "process"
@@ -57,7 +57,7 @@ class BaseTestCase(unittest.TestCase):
         values = cursor.execute(f"SELECT * FROM {table}").fetchone()
 
         with self.assertRaises(sqlite3.IntegrityError):
-            database_setup.inject_values(self.conn, table, values)
+            cursor.execute(f"INSERT INTO {table} VALUES {values}")
 
     def test_component_null(self):
         table = "component"
