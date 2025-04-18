@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 
+
 def get_git_root():
     try:
         root = subprocess.check_output(

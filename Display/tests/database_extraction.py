@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 
+
 def get_git_root():
     try:
         root = subprocess.check_output(
@@ -14,6 +15,7 @@ def get_git_root():
     except subprocess.CalledProcessError:
         return None  
         
+
 class BaseTestCase(unittest.TestCase):
     db_name = None  # to be set in subclasses
 
