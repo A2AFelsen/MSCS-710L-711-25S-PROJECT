@@ -12,31 +12,23 @@ class BaseTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         assert cls.db_name, "db_name must be set in the subclass"
         assert hasattr(cls, "local"), "local must be set in the subclass"
-        print(f"Running Extraction Test Suite on {cls.db_name}")
         if cls.local:
-            print("Local Run detected. Creating Local Databases")
             database_setup.delete_all_databases()
             database_setup.create_all_databases()
         else:
-            print(f"Copying {cls.db_name} to cwd")
             shutil.copy(cls.db_name, os.path.basename(cls.db_name))
             cls.db_name = os.path.basename(cls.db_name)
         cls.conn = sqlite3.connect(cls.db_name)
 
     @classmethod
     def tearDownClass(cls) -> None:
-        print(f"Finish Test Suite on {cls.db_name}")
         cls.conn.close()
         if cls.local:
-            print("Deleting Local Databases")
             database_setup.delete_all_databases()
         else:
-            print(f"Removing Local copy of {cls.db_name}")
             os.remove(cls.db_name)
-        print()
 
     def test_corruption(self):
-        print(f"    Running: Test Corruption on {self.db_name}")
         corrupt_db = "corrupt_test.db"
         shutil.copy(self.db_name, corrupt_db)
         conn = sqlite3.connect(corrupt_db)
@@ -52,7 +44,6 @@ class BaseTestCase(unittest.TestCase):
         os.remove(corrupt_db)
 
     def test_new_database(self):
-        print(f"    Running: Test New Database on {self.db_name}")
         new_db = "new_test.db"
         shutil.copy(self.db_name, new_db)
         conn = sqlite3.connect(new_db)
@@ -69,7 +60,6 @@ class BaseTestCase(unittest.TestCase):
         os.remove(new_db)
 
     def test_missing_database(self):
-        print(f"    Running: Test Missing Database on {self.db_name}")
         missing_db = "missing_test.db"
         if os.path.exists(missing_db):
             os.remove(missing_db)
