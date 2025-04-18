@@ -38,6 +38,7 @@ def user_report():
         "reports.html", datasets=datasets, max_datapoints=max_datapoints
     )
 
+
 @app.route("/proc_table", methods=["POST"])
 def proc_table():
     data = read_database.read_processes()
