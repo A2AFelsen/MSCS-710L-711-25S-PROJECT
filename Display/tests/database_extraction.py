@@ -3,8 +3,17 @@ import unittest
 import database_setup
 import os
 import shutil
+import subprocess
 
-
+def get_git_root():
+    try:
+        root = subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'], 
+            stderr=subprocess.DEVNULL).decode('utf-8').strip()
+        return root
+    except subprocess.CalledProcessError:
+        return None  
+        
 class BaseTestCase(unittest.TestCase):
     db_name = None  # to be set in subclasses
 
@@ -72,7 +81,7 @@ class BaseTestCase(unittest.TestCase):
 
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
-    for db in [["normal.db", True], ["sample_dbs/metrics.db", False]]:
+    for db in [["normal.db", True], [os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db"), False]]:
         name = f"Test_{os.path.basename(db[0].split('.')[0])}"
         test_case = type(name, (BaseTestCase,), {"db_name": db[0], "local": db[1]})
         tests = loader.loadTestsFromTestCase(test_case)
