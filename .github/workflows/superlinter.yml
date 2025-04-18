@@ -109,6 +109,24 @@ jobs:
             OpenHardwareMonitor/bin/Release/x86/
         if: matrix.dotnet-version == '4.8'
 
+  Python-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"  
+        
+    - name: Install dependencies
+      run: python -m pip install --upgrade pip
+
+    - name: Run tests
+      run: python Display/tests/master_tester.py
+
 #  codeql:
 #    name: CodeQL Analysis
 #    runs-on: windows-latest
