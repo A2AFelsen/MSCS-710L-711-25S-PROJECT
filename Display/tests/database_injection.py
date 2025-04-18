@@ -12,7 +12,7 @@ class BaseTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         assert cls.db_name, "db_name must be set in the subclass"
         assert hasattr(cls, "local"), "local must be set in the subclass"
-        print(f"Running Test Suite on {cls.db_name}")
+        print(f"Running Injection Test Suite on {cls.db_name}")
         if cls.local:
             print("Local Run detected. Creating Local Databases")
             database_setup.delete_all_databases()
