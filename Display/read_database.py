@@ -9,9 +9,24 @@
 #    - Actually fill out methods                                                          #
 ###########################################################################################
 
+import subprocess
 import os
 import random
 import sqlite3
+
+
+def get_git_root():
+    try:
+        root = subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'],
+            stderr=subprocess.DEVNULL).decode('utf-8').strip()
+        return root
+    except subprocess.CalledProcessError:
+        return None
+
+
+def get_default_database():
+    return os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db")
 
 
 # Check to see if the database exists.
@@ -26,7 +41,7 @@ def check_db(db):
 
 
 # Read the Metrics from the database
-def read_metrics(db="metrics.db"):
+def read_metrics(db=get_default_database()):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     output = cursor.execute("""
@@ -51,7 +66,7 @@ def read_metrics(db="metrics.db"):
     return component_dict
 
 
-def read_processes(db="metrics.db"):
+def read_processes(db=get_default_database()):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     output = cursor.execute("SELECT pid, timestamp, cpu_usage, memory_usage FROM process ORDER BY pid").fetchall()
