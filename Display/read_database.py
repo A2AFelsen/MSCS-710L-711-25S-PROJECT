@@ -25,8 +25,21 @@ def get_git_root():
         return None
 
 
-def get_default_database():
-    return os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db")
+def get_database(debug):
+    if debug == 0:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db")
+    if debug == 2:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/normal.db")
+    if debug == 3:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/empty.db")
+    if debug == 4:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/missing.db")
+    if debug == 5:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/unexpected.db")
+    if debug == 6:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/corrupted.db")
+    else:
+        return os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db")
 
 
 # Check to see if the database exists.
@@ -41,7 +54,8 @@ def check_db(db):
 
 
 # Read the Metrics from the database
-def read_metrics(db=get_default_database()):
+def read_metrics(debug=0):
+    db = get_database(debug)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     output = cursor.execute("""
@@ -66,7 +80,8 @@ def read_metrics(db=get_default_database()):
     return component_dict
 
 
-def read_processes(db=get_default_database()):
+def read_processes(debug=0):
+    db = get_database(debug)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     output = cursor.execute("SELECT pid, timestamp, cpu_usage, memory_usage FROM process ORDER BY pid").fetchall()

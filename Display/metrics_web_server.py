@@ -11,7 +11,7 @@
 ###########################################################################################
 
 import read_database
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from web_server_database_interface import generate_datasets
 
 # Set up the Flask instance
@@ -31,8 +31,8 @@ def gather_report():
 
 @app.route("/user_report", methods=["POST"])
 def user_report():
-    datasets = generate_datasets()
-    datasets = read_database.read_metrics()
+    debug = request.form.get("debug", type=int, default=0)
+    datasets = read_database.read_metrics(debug)
     max_datapoints = max((len(lst) for lst in datasets.values()), default=0)
     return render_template(
         "reports.html", datasets=datasets, max_datapoints=max_datapoints
@@ -41,7 +41,8 @@ def user_report():
 
 @app.route("/proc_table", methods=["POST"])
 def proc_table():
-    data = read_database.read_processes()
+    debug = request.form.get("debug", type=int, default=0)
+    data = read_database.read_processes(debug)
     return render_template(
         "processes.html", data=data
     )
