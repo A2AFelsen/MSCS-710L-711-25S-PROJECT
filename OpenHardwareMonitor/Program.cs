@@ -12,6 +12,7 @@ namespace OpenHardwareMonitor
     {
         private static Computer Computer;
         private static PerformanceCounter cpuCounter;
+        private static readonly object collectionLock = new object();
 
         static void Main(string[] args)
         {
@@ -86,16 +87,32 @@ namespace OpenHardwareMonitor
                 Computer.Open();
                 cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
-                // Create timer but don't start yet
-                Timer timer = new Timer(3000);
-                timer.Elapsed += OnTimedEvent;
+                // Create and configure timer
+                Timer timer = new Timer(30000);
+                timer.Elapsed += (sender, ElapsedEventArgs) =>
+                {
+                    lock (collectionLock)
+                    {
+                        try
+                        {
+                            OnTimedEvent(sender, ElapsedEventArgs);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Timer event failed: {ex.Message}");
+                        }
+                    }
+                };
                 timer.AutoReset = true;
 
-                // First collection
-                OnTimedEvent(null, null);
+                // Initial synchronous collection
+                lock (collectionLock)
+                {
+                    OnTimedEvent(null, null);
+                }
 
-                // Start timer after first collection
-                timer.Enabled = true;
+                // Start timer after first collection completes
+                timer.Start();
 
                 Console.WriteLine("Press Enter to exit the program.");
                 Console.ReadLine();
@@ -155,6 +172,8 @@ namespace OpenHardwareMonitor
                     Console.WriteLine($"\n{hardwareItem.Name} ({hardwareItem.HardwareType})");
                     foreach (var sensor in hardwareItem.Sensors)
                     {
+                        if (!sensor.Value.HasValue)
+                            continue;
 
                         // Temperature monitoring
                         if (sensor.SensorType == SensorType.Temperature)
@@ -238,7 +257,6 @@ namespace OpenHardwareMonitor
                 // Process monitoring
                 Console.WriteLine("\nProcess Monitoring:");
                 Process[] processes = Process.GetProcesses();
-                //var currentProcessCpuUsage = new Dictionary<int, (TimeSpan cpuTime, DateTime timestamp)>(); <- unused?
                 foreach (Process process in processes)
                 {
                     if (process.Id != 0)
@@ -286,7 +304,7 @@ namespace OpenHardwareMonitor
             }
         }
 
-        private static string GetHardwareSerialNumber(IHardware hardware)
+        public static string GetHardwareSerialNumber(IHardware hardware)
         {
             string serialNumber;
             switch (hardware.HardwareType)
@@ -320,7 +338,7 @@ namespace OpenHardwareMonitor
             return serialNumber;
         }
 
-        private static string GenerateDeterministicSerialNumber(IHardware hardware)
+        public static string GenerateDeterministicSerialNumber(IHardware hardware)
         {
             string identifier = $"{hardware.HardwareType}-{hardware.Name}-{hardware.Identifier}";
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
@@ -347,7 +365,8 @@ namespace OpenHardwareMonitor
             return 0;
         }
 
-        private static string GetWMISerialNumber(string wmiClass, string propertyName)
+        public static Func<string, string, string> GetWmiSerialNumber { get; set; } = DefaultGetWmiSerialNumber;
+        private static string DefaultGetWmiSerialNumber(string wmiClass, string propertyName)
         {
             try
             {
@@ -362,6 +381,11 @@ namespace OpenHardwareMonitor
                 Console.WriteLine($"Error retrieving {wmiClass} serial number: {ex.Message}");
             }
             return "Not Available";
+        }
+
+        public static string GetWMISerialNumber(string wmiClass, string propertyName)
+        {
+            return GetWmiSerialNumber(wmiClass, propertyName);
         }
 
         private static float GetCpuBaseClockSpeed()
@@ -387,7 +411,7 @@ namespace OpenHardwareMonitor
             return (1200f, 7000f); // Default values for most mid-range GPUs
         }
 
-        private static float GetRamSpeed()
+        public static float GetRamSpeed()
         {
             try
             {
@@ -404,14 +428,14 @@ namespace OpenHardwareMonitor
             return 0;
         }
 
-        private static bool IsRunningAsAdministrator()
+        public static Func<bool> IsRunningAsAdministrator = () =>
         {
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
+        };
 
-        private static void RelaunchAsAdministrator()
+        public static Action RelaunchAsAdministrator = () =>
         {
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
@@ -428,6 +452,6 @@ namespace OpenHardwareMonitor
             }
 
             Environment.Exit(0);
-        }
+        };
     }
 }
