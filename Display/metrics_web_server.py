@@ -12,7 +12,6 @@
 
 import read_database
 from flask import Flask, render_template, request
-from web_server_database_interface import generate_datasets
 
 # Set up the Flask instance
 app = Flask(__name__)
