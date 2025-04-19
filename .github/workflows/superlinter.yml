@@ -89,7 +89,7 @@ jobs:
           }
 
       - name: Run tests
-        run: dotnet test OpenHardwareMonitor/OpenHardwareMonitor.sln --no-build --configuration Release
+        run: dotnet test OpenHardwareMonitor/OpenHardwareMonitor.sln --no-build --configuration Release --verbosity normal
 
       - name: Publish build artifacts
         uses: actions/upload-artifact@v4
