@@ -9,7 +9,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenHardwareMonitor.MetricsTests
+namespace OpenHardwareMonitor.Tests
 {
     [TestClass]
     public class HardwareMonitorTests
