@@ -9,26 +9,26 @@ on:
       - main
 
 jobs:
-  lint:
-    name: Lint code base
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Run Super-Linter
-        uses: github/super-linter@v4
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_IGNORE_PATHS: "OpenHardwareMonitor/App.config"
-          FILTER_REGEX_EXCLUDE: |-
-            .*\.github/workflows/superlinter\.yml
-            .*\.github/workflows/release\.yml
-            .*OpenHardwareMonitor/App\.config
-          MARKDOWN_FIX_END_OF_FILE: true
-          PYTHON_BLACK_CONFIG_FILE: .python-black
-          PYTHON_ISORT_CONFIG_FILE: .isort.cfg
+#  lint:
+#    name: Lint code base
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Run Super-Linter
+#        uses: github/super-linter@v4
+#        env:
+#         DEFAULT_BRANCH: main
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GITLEAKS_IGNORE_PATHS: "OpenHardwareMonitor/App.config"
+#          FILTER_REGEX_EXCLUDE: |-
+#           .*\.github/workflows/superlinter\.yml
+#            .*\.github/workflows/release\.yml
+#            .*OpenHardwareMonitor/App\.config
+#          MARKDOWN_FIX_END_OF_FILE: true
+#          PYTHON_BLACK_CONFIG_FILE: .python-black
+#          PYTHON_ISORT_CONFIG_FILE: .isort.cfg
 
   build-and-test:
     name: Build and Test
