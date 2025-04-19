@@ -92,7 +92,7 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ matrix.dotnet-version }}" -eq "4.8") {
-            $vsTestPath = "${env:VSINSTALLDIR}Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
+            $vsTestPath = Join-Path $env:VSINSTALLDIR "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
             Write-Host "Using vstest.console.exe from: $vsTestPath"
             & $vsTestPath "OpenHardwareMonitor.Tests\bin\Release\OpenHardwareMonitor.Tests.dll"
           } else {
