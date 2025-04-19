@@ -16,6 +16,7 @@ namespace OpenHardwareMonitor
 
         static void Main(string[] args)
         {
+            TimeSpan dataLifetime = TimeSpan.FromDays(365); // Default to 1 year, changed via --lifetime arg
             try
             {
                 if (args.Length > 0)
@@ -30,29 +31,27 @@ namespace OpenHardwareMonitor
                         }
                         else if (args[0] == "clear-db")
                         {
-                            DatabaseHelper.InitializeDatabase(); // Ensure the database exists
+                            DatabaseHelper.InitializeDatabase();
                             DatabaseHelper.ClearDatabase();
                             Console.WriteLine("Database cleared.");
                             return;
                         }
-                    }
-                    catch (DatabaseInitializationException ex)
-                    {
-                        Console.WriteLine($"Database initialization failed: {ex.Message}");
-                        if (ex.InnerException != null)
+                        else if (args[0] == "--lifetime" && args.Length > 1)
                         {
-                            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                            dataLifetime = ParseLifetimeArgument(args[1]);
+                            Console.WriteLine($"Data lifetime set to: {dataLifetime.TotalDays} days");
                         }
-                        return;
-                    }
-                    catch (DatabaseOperationException ex)
-                    {
-                        Console.WriteLine($"Database operation failed: {ex.Message}");
-                        if (ex.InnerException != null)
+                        else if (args[0] == "prune-now")
                         {
-                            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                            DatabaseHelper.InitializeDatabase();
+                            DatabaseHelper.PruneOldData(dataLifetime);
+                            Console.WriteLine("Data pruning completed.");
+                            return;
                         }
-                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error processing arguments: {ex.Message}");
                     }
                 }
 
@@ -87,7 +86,7 @@ namespace OpenHardwareMonitor
                 Computer.Open();
                 cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
-                // Create and configure timer
+                // Create and configure sensor collection timer
                 Timer timer = new Timer(30000);
                 timer.Elapsed += (sender, ElapsedEventArgs) =>
                 {
@@ -95,7 +94,7 @@ namespace OpenHardwareMonitor
                     {
                         try
                         {
-                            OnTimedEvent(sender, ElapsedEventArgs);
+                            OnTimedEvent(sender, ElapsedEventArgs, dataLifetime);
                         }
                         catch (Exception ex)
                         {
@@ -105,19 +104,39 @@ namespace OpenHardwareMonitor
                 };
                 timer.AutoReset = true;
 
+                // Create and configure pruning timer (runs once per day)
+                Timer pruningTimer = new Timer(TimeSpan.FromDays(1).TotalMilliseconds);
+                pruningTimer.Elapsed += (sender, e) =>
+                {
+                    try
+                    {
+                        Console.WriteLine($"\nPruning data older than {dataLifetime.TotalDays} days...");
+                        DatabaseHelper.PruneOldData(dataLifetime);
+                        Console.WriteLine("Data pruning completed.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error during pruning: {ex.Message}");
+                    }
+                };
+                pruningTimer.AutoReset = true;
+
                 // Initial synchronous collection
                 lock (collectionLock)
                 {
-                    OnTimedEvent(null, null);
+                    OnTimedEvent(null, null, dataLifetime);
                 }
 
-                // Start timer after first collection completes
+                // Start both timers after first collection completes
                 timer.Start();
+                pruningTimer.Start();
 
                 Console.WriteLine("Press Enter to exit the program.");
                 Console.ReadLine();
 
+                pruningTimer.Stop();
                 timer.Stop();
+                pruningTimer.Dispose();
                 timer.Dispose();
                 Computer.Close();
                 DatabaseHelper.CloseConnection();
@@ -130,7 +149,28 @@ namespace OpenHardwareMonitor
             }
         }
 
-        private static void OnTimedEvent(Object source, ElapsedEventArgs e)
+        private static TimeSpan ParseLifetimeArgument(string arg)
+        {
+            if (string.IsNullOrWhiteSpace(arg))
+                throw new ArgumentException("Lifetime argument cannot be empty");
+
+            char unit = arg[arg.Length - 1]; // Changed from ^1
+            string numberPart = arg.Substring(0, arg.Length - 1); // Changed from 0..^1
+
+            if (!int.TryParse(numberPart, out int value))
+                throw new ArgumentException("Invalid lifetime format");
+
+            switch (unit)
+            {
+                case 'd': return TimeSpan.FromDays(value);
+                case 'w': return TimeSpan.FromDays(value * 7);
+                case 'm': return TimeSpan.FromDays(value * 30);
+                case 'y': return TimeSpan.FromDays(value * 365);
+                default: throw new ArgumentException("Unknown lifetime unit. Use d, w, m, or y");
+            }
+        }
+
+        private static void OnTimedEvent(Object source, ElapsedEventArgs e, TimeSpan dataLifetime)
         {
             DateTime timestamp = DateTime.Now;
             Console.WriteLine($"\n=== Reading sensor data at {timestamp} ===");
@@ -238,10 +278,10 @@ namespace OpenHardwareMonitor
                             currentCoreClock,
                             currentMemoryClock,
                             GetTotalRAM(),
-                            timestamp.AddYears(1)
+                            dataLifetime
                         );
 
-                        Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, load={load}, PowerConsumption={powerConsumption}, CoreSpeed={currentCoreClock}, MemorySpeed={currentMemoryClock}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.AddYears(1)}");
+                        Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, load={load}, PowerConsumption={powerConsumption}, CoreSpeed={currentCoreClock}, MemorySpeed={currentMemoryClock}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.Add(dataLifetime)}");
                         Console.WriteLine($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
                     }
                     catch (DatabaseOperationException ex)
@@ -281,7 +321,7 @@ namespace OpenHardwareMonitor
                                     timestamp,
                                     cpuUsage,
                                     memoryUsage,
-                                    timestamp.AddYears(1)
+                                    dataLifetime
                                 );
 
                                 Console.WriteLine($"  PID {process.Id}: CPU={cpuUsage}%, RAM={memoryUsage}MB");
