@@ -8,6 +8,7 @@ namespace OpenHardwareMonitor
     {
         private static SQLiteConnection dbConnection;
         private static readonly object _lock = new object();
+        private static bool isInjectedConnection = false; // Track whether dbConnection was set manually (e.g. by tests)
 
         public static void InitializeDatabase()
         {
@@ -15,8 +16,15 @@ namespace OpenHardwareMonitor
             {
                 lock (_lock)
                 {
-                    dbConnection = new SQLiteConnection("Data Source=metrics.db;Version=3;FailIfMissing=False;");
-                    dbConnection.Open();
+                    if (dbConnection == null)
+                    {
+                        dbConnection = new SQLiteConnection("Data Source=metrics.db;Version=3;FailIfMissing=False;");
+                        dbConnection.Open();
+                    }
+                    else if (dbConnection.State != System.Data.ConnectionState.Open)
+                    {
+                        dbConnection.Open();
+                    }
 
                     // Create component table
                     ExecuteNonQueryWithRetry(@"
@@ -211,15 +219,18 @@ namespace OpenHardwareMonitor
         {
             lock (_lock)
             {
-                try
+                if (!isInjectedConnection)
                 {
-                    dbConnection?.Close();
-                    dbConnection?.Dispose();
-                    dbConnection = null;
-                }
-                catch (SQLiteException ex)
-                {
-                    throw new DatabaseOperationException("Failed to close database connection", ex);
+                    try
+                    {
+                        dbConnection?.Close();
+                        dbConnection?.Dispose();
+                        dbConnection = null;
+                    }
+                    catch (SQLiteException ex)
+                    {
+                        throw new DatabaseOperationException("Failed to close database connection", ex);
+                    }
                 }
             }
         }

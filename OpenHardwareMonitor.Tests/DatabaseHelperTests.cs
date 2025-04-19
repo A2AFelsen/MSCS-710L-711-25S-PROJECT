@@ -22,6 +22,7 @@ namespace OpenHardwareMonitor.Tests
             var field = typeof(DatabaseHelper).GetField("dbConnection",
                 BindingFlags.Static | BindingFlags.NonPublic);
             field.SetValue(null, _testConnection);
+            typeof(DatabaseHelper).GetField("isInjectedConnection", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, true);
         }
 
         [TestInitialize]
