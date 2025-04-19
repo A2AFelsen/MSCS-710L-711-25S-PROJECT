@@ -92,9 +92,13 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ matrix.dotnet-version }}" -eq "4.8") {
-            $vsTestPath = Join-Path $env:VSINSTALLDIR "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
-            Write-Host "Using vstest.console.exe from: $vsTestPath"
-            & $vsTestPath "OpenHardwareMonitor.Tests\bin\Release\OpenHardwareMonitor.Tests.dll"
+            $vstest = Get-ChildItem "C:\Program Files\Microsoft Visual Studio\2022" -Recurse -Filter vstest.console.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $vstest) {
+              Write-Error "Could not find vstest.console.exe"
+              exit 1
+            }
+            Write-Host "Using vstest.console.exe from: $($vstest.FullName)"
+            & $vstest.FullName "OpenHardwareMonitor.Tests\bin\Release\OpenHardwareMonitor.Tests.dll"
           } else {
             dotnet test OpenHardwareMonitor/OpenHardwareMonitor.sln --no-build --configuration Release --verbosity normal
           }
