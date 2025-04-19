@@ -92,8 +92,9 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ matrix.dotnet-version }}" -eq "4.8") {
-            $vstest = (Get-Command vstest.console.exe).Source
-            & $vstest "OpenHardwareMonitor.Tests\bin\Release\OpenHardwareMonitor.Tests.dll"
+            $vsTestPath = "${env:VSINSTALLDIR}Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
+            Write-Host "Using vstest.console.exe from: $vsTestPath"
+            & $vsTestPath "OpenHardwareMonitor.Tests\bin\Release\OpenHardwareMonitor.Tests.dll"
           } else {
             dotnet test OpenHardwareMonitor/OpenHardwareMonitor.sln --no-build --configuration Release --verbosity normal
           }
