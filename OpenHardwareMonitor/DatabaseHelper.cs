@@ -129,23 +129,25 @@ namespace OpenHardwareMonitor
 
         public static void InsertComponentStatistic(string serialNumber, DateTime timestamp, string machineState,
             float temperature, float usage, float? powerConsumption, float? coreSpeed,
-            float? memorySpeed, float totalRam, DateTime endOfLife)
+            float? memorySpeed, float totalRam, TimeSpan lifetime)
         {
             if (string.IsNullOrWhiteSpace(serialNumber))
                 throw new ArgumentException("Serial number cannot be null or empty", nameof(serialNumber));
             if (string.IsNullOrWhiteSpace(machineState))
                 throw new ArgumentException("Machine state cannot be null or empty", nameof(machineState));
 
+            DateTime endOfLife = DateTime.Now.Add(lifetime);
+
             try
             {
                 lock (_lock)
                 {
                     string insertQuery = @"
-                        INSERT OR REPLACE INTO component_statistic
-                        (serial_number, timestamp, machine_state, temperature, usage, power_consumption, 
-                         core_speed, memory_speed, total_ram, end_of_life)
-                        VALUES (@serialNumber, @timestamp, @machineState, @temperature, @usage, 
-                                @powerConsumption, @coreSpeed, @memorySpeed, @totalRam, @endOfLife)";
+                INSERT OR REPLACE INTO component_statistic
+                (serial_number, timestamp, machine_state, temperature, usage, power_consumption, 
+                 core_speed, memory_speed, total_ram, end_of_life)
+                VALUES (@serialNumber, @timestamp, @machineState, @temperature, @usage, 
+                        @powerConsumption, @coreSpeed, @memorySpeed, @totalRam, @endOfLife)";
 
                     using (var command = new SQLiteCommand(insertQuery, dbConnection))
                     {
@@ -169,8 +171,10 @@ namespace OpenHardwareMonitor
             }
         }
 
-        public static void InsertProcess(int pid, DateTime timestamp, float cpuUsage, float memoryUsage, DateTime endOfLife)
+        public static void InsertProcess(int pid, DateTime timestamp, float cpuUsage, float memoryUsage, TimeSpan lifetime)
         {
+            DateTime endOfLife = DateTime.Now.Add(lifetime);
+
             try
             {
                 lock (_lock)
@@ -235,14 +239,21 @@ namespace OpenHardwareMonitor
             }
         }
 
-        private static void ExecuteNonQueryWithRetry(string query, int maxRetries = 3)
+        private static void ExecuteNonQueryWithRetry(string query, int maxRetries = 3, params SQLiteParameter[] parameters)
         {
             int retryCount = 0;
             while (true)
             {
                 try
                 {
-                    ExecuteNonQuery(query);
+                    using (var command = new SQLiteCommand(query, dbConnection))
+                    {
+                        if (parameters != null && parameters.Length > 0)
+                        {
+                            command.Parameters.AddRange(parameters);
+                        }
+                        command.ExecuteNonQuery();
+                    }
                     return;
                 }
                 catch (SQLiteException) when (retryCount < maxRetries)
@@ -258,6 +269,41 @@ namespace OpenHardwareMonitor
             using (var command = new SQLiteCommand(query, dbConnection))
             {
                 command.ExecuteNonQuery();
+            }
+        }
+
+        public static void PruneOldData(TimeSpan maxAge)
+        {
+            try
+            {
+                lock (_lock)
+                {
+                    DateTime cutoffDate = DateTime.Now.Subtract(maxAge);
+                    DateTime currentDate = DateTime.Now;
+
+                    // Prune component_statistic
+                    ExecuteNonQueryWithRetry(
+                        "DELETE FROM component_statistic WHERE timestamp < @cutoffDate OR end_of_life < @currentDate",
+                        3, // maxRetries parameter
+                        new SQLiteParameter("@cutoffDate", cutoffDate),
+                        new SQLiteParameter("@currentDate", currentDate));
+
+                    // Prune process
+                    ExecuteNonQueryWithRetry(
+                        "DELETE FROM process WHERE timestamp < @cutoffDate OR end_of_life < @currentDate",
+                        3, // maxRetries parameter
+                        new SQLiteParameter("@cutoffDate", cutoffDate),
+                        new SQLiteParameter("@currentDate", currentDate));
+
+                    // Delete orphaned components
+                    ExecuteNonQueryWithRetry(
+                        "DELETE FROM component WHERE serial_number NOT IN (SELECT DISTINCT serial_number FROM component_statistic)",
+                        3);
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                throw new DatabaseOperationException("Failed to prune old data", ex);
             }
         }
     }
