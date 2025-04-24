@@ -60,7 +60,7 @@ def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
 
     # Currently have 6 databases to test. Run each test once with each database
-    for i in range(0, 7):
+    for i in range(1, 7):
         name = f"Test_Debug_level_{i}"
         test_case = type(name, (FlaskAppTestCase,), {"debug": i})
         tests = loader.loadTestsFromTestCase(test_case)

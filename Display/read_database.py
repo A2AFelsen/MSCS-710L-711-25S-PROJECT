@@ -11,8 +11,8 @@
 
 import subprocess
 import os
-import random
 import sqlite3
+import database_manager
 
 
 def get_git_root():
@@ -26,20 +26,28 @@ def get_git_root():
 
 
 def get_database(debug):
-    if debug == 0:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db")
-    if debug == 2:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/normal.db")
-    if debug == 3:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/empty.db")
-    if debug == 4:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/missing.db")
-    if debug == 5:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/unexpected.db")
-    if debug == 6:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/corrupted.db")
+    if get_git_root():
+        root = os.path.join(get_git_root(), "Display/tests/sample_dbs")
     else:
-        return os.path.join(get_git_root(), "Display/tests/sample_dbs/metrics.db")
+        root = "."
+
+    if debug == 0:
+        root = "."
+        return os.path.join(root, "../metrics.db")
+    if debug == 1:
+        return os.path.join(root, "metrics.db")
+    if debug == 2:
+        return os.path.join(root, "normal.db")
+    if debug == 3:
+        return os.path.join(root, "empty.db")
+    if debug == 4:
+        return os.path.join(root, "missing.db")
+    if debug == 5:
+        return os.path.join(root, "unexpected.db")
+    if debug == 6:
+        return os.path.join(root, "corrupted.db")
+    else:
+        return os.path.join(root, "metrics.db")
 
 
 # Check to see if the database exists.
@@ -57,6 +65,8 @@ def check_db(db):
 def read_metrics(debug=0):
     db = get_database(debug)
     conn = sqlite3.connect(db)
+    database_manager.create_mtg_database(conn)
+
     cursor = conn.cursor()
     output = cursor.execute("""
         SELECT t1.serial_number, t1.timestamp, t1.temperature, t1.usage, t1.power_consumption, 
@@ -88,6 +98,7 @@ def read_metrics(debug=0):
 def read_processes(debug=0):
     db = get_database(debug)
     conn = sqlite3.connect(db)
+    database_manager.create_mtg_database(conn)
     cursor = conn.cursor()
     output = cursor.execute("SELECT pid, timestamp, cpu_usage, memory_usage FROM process ORDER BY pid").fetchall()
     return output
