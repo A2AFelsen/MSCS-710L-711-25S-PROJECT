@@ -59,7 +59,8 @@ def read_metrics(debug=0):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     output = cursor.execute("""
-        SELECT t1.serial_number, t1.timestamp, t1.usage, t1.total_ram, t2.device_type
+        SELECT t1.serial_number, t1.timestamp, t1.temperature, t1.usage, t1.power_consumption, 
+               t1.core_speed, t1.memory_speed, t1.total_ram, t2.device_type
         FROM 'component_statistic' t1 
         JOIN 'component' t2 
         ON t1.serial_number = t2.serial_number
@@ -69,11 +70,15 @@ def read_metrics(debug=0):
     for entry in output:
         serial_number = entry[0]
         timestamp     = entry[1]
-        usage         = entry[2]
-        total_ram     = entry[3]
-        device_type   = entry[4]
-        key   = f"{serial_number} ({device_type})"
-        value = [timestamp, usage, total_ram, random.randint(1, 100)]
+        temperature   = entry[2]
+        usage         = entry[3]
+        power_consume = entry[4]
+        core_speed    = entry[5]
+        memory_speed  = entry[6]
+        total_ram     = entry[7]
+        device_type   = entry[8]
+        key = f"{serial_number} ({device_type})"
+        value = [timestamp, temperature, usage, power_consume, core_speed, memory_speed, total_ram]
         if key not in component_dict:
             component_dict[key] = []
         component_dict[key].append(value)
