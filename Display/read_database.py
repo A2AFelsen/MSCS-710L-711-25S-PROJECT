@@ -100,5 +100,7 @@ def read_processes(debug=0):
     conn = sqlite3.connect(db)
     database_manager.create_mtg_database(conn)
     cursor = conn.cursor()
-    output = cursor.execute("SELECT pid, timestamp, cpu_usage, memory_usage FROM process ORDER BY pid").fetchall()
+    output = cursor.execute("""SELECT pid, timestamp, cpu_usage, memory_usage, end_of_life
+                               FROM process 
+                               ORDER BY pid""").fetchall()
     return output
