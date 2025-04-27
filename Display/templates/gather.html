@@ -70,25 +70,26 @@
     <div class="metrics-group">
         <div class="form-row">
             <label for="years">Years</label>
-            <input type="Text" name="years" id="years" maxlength="2">
+            <input type="Text" name="years" id="years" maxlength="2" value="1">
         </div>
 
         <div class="form-row">
             <label for="months">Months</label>
-            <input type="Text" name="months" id="months" maxlength="2">
+            <input type="Text" name="months" id="months" maxlength="2" value="0">
         </div>
 
         <div class="form-row">
             <label for="weeks">Weeks</label>
-            <input type="Text" name="weeks" id="weeks" maxlength="2">
+            <input type="Text" name="weeks" id="weeks" maxlength="2" value="0">
         </div>
 
         <div class="form-row">
             <label for="days">Days</label>
-            <input type="Text" name="days" id="days" maxlength="2">
+            <input type="Text" name="days" id="days" maxlength="2" value="0">
         </div>
 
         <button onclick="runExe()">Toggle Metrics</button>
+        <button onclick="prune()">Prune Now!</button>
     </div>
 
     <script>
@@ -104,6 +105,15 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ years: years, months: months, weeks: weeks, days: days })
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => alert("Error: " + error));
+        }
+
+        function prune() {
+            fetch('/prune-now', {
+                method: 'POST'
             })
             .then(response => response.text())
             .then(data => alert(data))
