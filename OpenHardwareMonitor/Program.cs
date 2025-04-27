@@ -157,20 +157,36 @@ namespace OpenHardwareMonitor
             if (string.IsNullOrWhiteSpace(arg))
                 throw new ArgumentException("Lifetime argument cannot be empty");
 
-            char unit = arg[arg.Length - 1]; // Changed from ^1
-            string numberPart = arg.Substring(0, arg.Length - 1); // Changed from 0..^1
+            TimeSpan total = TimeSpan.Zero;
 
-            if (!int.TryParse(numberPart, out int value))
+            // Split the argument into parts (e.g., "1m2w3d" -> ["1m", "2w", "3d"])
+            var parts = System.Text.RegularExpressions.Regex.Matches(arg, @"(\d+[dwmy])")
+                .Cast<System.Text.RegularExpressions.Match>()
+                .Select(m => m.Value)
+                .ToList();
+
+            if (parts.Count == 0)
                 throw new ArgumentException("Invalid lifetime format");
 
-            switch (unit)
+            foreach (var part in parts)
             {
-                case 'd': return TimeSpan.FromDays(value);
-                case 'w': return TimeSpan.FromDays(value * 7);
-                case 'm': return TimeSpan.FromDays(value * 30);
-                case 'y': return TimeSpan.FromDays(value * 365);
-                default: throw new ArgumentException("Unknown lifetime unit. Use d, w, m, or y");
+                char unit = part[part.Length - 1];
+                string numberPart = part.Substring(0, part.Length - 1);
+
+                if (!int.TryParse(numberPart, out int value))
+                    throw new ArgumentException($"Invalid number in lifetime segment: {part}");
+
+                switch (unit)
+                {
+                    case 'd': total += TimeSpan.FromDays(value); break;
+                    case 'w': total += TimeSpan.FromDays(value * 7); break;
+                    case 'm': total += TimeSpan.FromDays(value * 30); break;
+                    case 'y': total += TimeSpan.FromDays(value * 365); break;
+                    default: throw new ArgumentException($"Unknown lifetime unit '{unit}'. Use d, w, m, or y");
+                }
             }
+
+            return total;
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e, TimeSpan dataLifetime)
