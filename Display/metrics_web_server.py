@@ -52,10 +52,10 @@ def proc_table():
 @app.route("/metrics", methods=['POST'])
 def run_metrics():
     data = request.get_json()
-    years = str(data.get('years'))
-    months = str(data.get('months'))
-    weeks = str(data.get('weeks'))
-    days = str(data.get('days'))
+    years = data.get('years')
+    months = data.get('months')
+    weeks = data.get('weeks')
+    days = data.get('days')
 
     if ohm_interface.is_metrics_running():
         return "Metrics Stopped"
