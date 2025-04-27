@@ -11,9 +11,8 @@
 ###########################################################################################
 
 import read_database
-import os
+import ohm_interface
 import subprocess
-import psutil
 from flask import Flask, render_template, request
 
 # Set up the Flask instance
@@ -50,40 +49,17 @@ def proc_table():
     )
 
 
-def is_metrics_running():
-    for proc in psutil.process_iter(['pid', 'name', 'username']):
-        try:
-            if "OpenHardwareMonitor.exe" == proc.info['name']:
-                proc.kill()
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-    return False
-
-
 @app.route("/metrics", methods=['POST'])
 def run_metrics():
     data = request.get_json()
-    years = data.get('years')
-    months = data.get('months')
-    weeks = data.get('weeks')
-    days = data.get('days')
+    years = str(data.get('years'))
+    months = str(data.get('months'))
+    weeks = str(data.get('weeks'))
+    days = str(data.get('days'))
 
-    rstr  = f"Years: {str(years)}\n"
-    rstr += f"Months: {str(months)}\n"
-    rstr += f"Weeks: {str(weeks)}\n"
-    rstr += f"Days: {str(days)}"
-
-    if is_metrics_running():
+    if ohm_interface.is_metrics_running():
         return "Metrics Stopped"
-    else:
-        parent_dir = os.path.dirname(os.getcwd())
-        metrics_exe = os.path.join(parent_dir, "OpenHardwareMonitor.exe")
-        if os.path.exists(metrics_exe):
-            output = subprocess.run(metrics_exe, cwd=parent_dir, capture_output=True, text=True, check=True)
-            return "Metrics Started"
-        else:
-            return "Can't Find Metrics"
+    return ohm_interface.call_executable(years, months, weeks, days)
 
 
 if __name__ == "__main__":
