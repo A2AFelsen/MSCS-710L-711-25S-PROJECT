@@ -4,9 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gatherer</title>
+    <style>
+        .button-group {
+            text-align: center;
+            margin-bottom: 20px;
+       }
+
+        .button-group button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+       }
+
+        .metrics-group {
+            text-align: center;
+           margin-bottom: 20px;
+        }
+
+        .metrics-group .form-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .metrics-group label {
+            width: 80px; /* Fixed width for label */
+            text-align: right;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .metrics-group input {
+            width: 25px; /* Fixed width for input */
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        .metrics-group button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+    </style>
 </head>
 <body>
-    <h1>Coming Soon!!</h1>
-    <button class="return-button" onclick="window.location.href='/'">Return</button>
+<h2 style="text-align:center;">The Gathering!</h2>
+
+    <div class="button-group">
+        <button class="return-button" onclick="window.location.href='/'">Home</button>
+        <form action="/gather" method="post" style="display:inline;">
+            <button>Reload</button>
+        </form>
+        <form action="/user_report" method="post" style="display:inline;">
+            <button>Metrics</button>
+        </form>
+        <form action="/proc_table" method="post" style="display:inline;">
+            <button>Processes</button>
+        </form>
+    </div>
+
+    <div class="metrics-group">
+        <div class="form-row">
+            <label for="years">Years</label>
+            <input type="Text" name="years" id="years" maxlength="2">
+        </div>
+
+        <div class="form-row">
+            <label for="months">Months</label>
+            <input type="Text" name="months" id="months" maxlength="2">
+        </div>
+
+        <div class="form-row">
+            <label for="weeks">Weeks</label>
+            <input type="Text" name="weeks" id="weeks" maxlength="2">
+        </div>
+
+        <div class="form-row">
+            <label for="days">Days</label>
+            <input type="Text" name="days" id="days" maxlength="2">
+        </div>
+
+        <button onclick="runExe()">Toggle Metrics</button>
+    </div>
+
+    <script>
+        function runExe() {
+            const years  = document.getElementById('years').value;
+            const months = document.getElementById('months').value;
+            const weeks  = document.getElementById('weeks').value;
+            const days   = document.getElementById('days').value;
+
+            fetch('/metrics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ years: years, months: months, weeks: weeks, days: days })
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => alert("Error: " + error));
+        }
+    </script>
+
 </body>
 </html>
