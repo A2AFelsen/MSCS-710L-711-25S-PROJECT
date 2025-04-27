@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Management;
 using System.Security.Principal;
 using System.Timers;
@@ -16,42 +17,44 @@ namespace OpenHardwareMonitor
 
         static void Main(string[] args)
         {
-            TimeSpan dataLifetime = TimeSpan.FromDays(365); // Default to 1 year, changed via --lifetime arg
             try
             {
-                if (args.Length > 0)
+                TimeSpan dataLifetime = TimeSpan.FromDays(365); // Default to 1 year, changed via --lifetime arg
+                for (int i = 0; i < args.Length; i++)
                 {
-                    try
+                    if (args[i] == "init-db")
                     {
-                        if (args[0] == "init-db")
-                        {
-                            DatabaseHelper.InitializeDatabase();
-                            Console.WriteLine("Database initialized.");
-                            return;
-                        }
-                        else if (args[0] == "clear-db")
-                        {
-                            DatabaseHelper.InitializeDatabase();
-                            DatabaseHelper.ClearDatabase();
-                            Console.WriteLine("Database cleared.");
-                            return;
-                        }
-                        else if (args[0] == "--lifetime" && args.Length > 1)
-                        {
-                            dataLifetime = ParseLifetimeArgument(args[1]);
-                            Console.WriteLine($"Data lifetime set to: {dataLifetime.TotalDays} days");
-                        }
-                        else if (args[0] == "prune-now")
-                        {
-                            DatabaseHelper.InitializeDatabase();
-                            DatabaseHelper.PruneOldData(dataLifetime);
-                            Console.WriteLine("Data pruning completed.");
-                            return;
-                        }
+                        DatabaseHelper.InitializeDatabase();
+                        Console.WriteLine("Database initialized.");
+                        return;
                     }
-                    catch (Exception ex)
+                    else if (args[i] == "clear-db")
                     {
-                        Console.WriteLine($"Error processing arguments: {ex.Message}");
+                        DatabaseHelper.InitializeDatabase();
+                        DatabaseHelper.ClearDatabase();
+                        Console.WriteLine("Database cleared.");
+                        return;
+                    }
+                    else if (args[i] == "--lifetime" && i + 1 < args.Length)
+                    {
+                        dataLifetime = ParseLifetimeArgument(args[i + 1]);
+                        Console.WriteLine($"Data lifetime set to: {dataLifetime.TotalDays} days");
+                        System.Threading.Thread.Sleep(5000);
+                        i++; // Skip the next argument since we've processed it
+                    }
+                    else if (args[i] == "prune-now")
+                    {
+                        // Allow override: "./OpenHardwareMonitor.exe prune-now --lifetime 30d"
+                        if (i + 1 < args.Length && args[i + 1] == "--lifetime" && i + 2 < args.Length)
+                        {
+                            dataLifetime = ParseLifetimeArgument(args[i + 2]);
+                            i += 2; // Skip next two args
+                        }
+
+                        DatabaseHelper.InitializeDatabase();
+                        DatabaseHelper.PruneOldData(dataLifetime);
+                        Console.WriteLine($"Pruned data older than {dataLifetime.TotalDays} days.");
+                        return;
                     }
                 }
 
@@ -477,9 +480,12 @@ namespace OpenHardwareMonitor
 
         public static Action RelaunchAsAdministrator = () =>
         {
+            Console.WriteLine("Program requires administrator privileges. Relaunching...");
+            System.Threading.Thread.Sleep(2000);
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
             procInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
+            procInfo.Arguments = string.Join(" ", Environment.GetCommandLineArgs().Skip(1)); // preserve arguments
             procInfo.Verb = "runas";
 
             try
