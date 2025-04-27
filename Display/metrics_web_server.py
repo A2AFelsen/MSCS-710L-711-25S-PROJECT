@@ -12,7 +12,6 @@
 
 import read_database
 import ohm_interface
-import subprocess
 from flask import Flask, render_template, request
 
 # Set up the Flask instance
@@ -60,6 +59,11 @@ def run_metrics():
     if ohm_interface.is_metrics_running():
         return "Metrics Stopped"
     return ohm_interface.call_executable(years, months, weeks, days)
+
+
+@app.route("/prune-now", methods=['POST'])
+def prune_metrics():
+    return ohm_interface.prune_data()
 
 
 if __name__ == "__main__":
