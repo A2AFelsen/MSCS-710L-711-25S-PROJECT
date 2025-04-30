@@ -55,6 +55,10 @@ def run_metrics():
     months = data.get('months')
     weeks = data.get('weeks')
     days = data.get('days')
+    job = data.get('job')
+
+    if job == 'prune':
+        return ohm_interface.prune_data(years, months, weeks, days)
 
     if ohm_interface.is_metrics_running():
         return "Metrics Stopped"

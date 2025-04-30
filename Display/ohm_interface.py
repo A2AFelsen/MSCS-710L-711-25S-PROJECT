@@ -37,23 +37,31 @@ def call_executable(years="1", months="0", weeks="0", days="0"):
         days = "0"
 
     metrics_exe = get_metrics_exe()
-    #metrics_call = [metrics_exe, "--lifetime", f"{str(years)}y", f"{str(months)}m", f"{str(weeks)}w", f"{str(days)}d"]
-    #metrics_call = [metrics_exe, "--lifetime", f"{str(years)}y{str(months)}m{str(weeks)}w{str(days)}d"]
-    #metrics_call = [metrics_exe, "--lifetime", f"{str(days)}d"]
-    metrics_call = [metrics_exe]
+    metrics_call = [metrics_exe, "--lifetime", f"{str(years)}y{str(months)}m{str(weeks)}w{str(days)}d"]
     print(metrics_call)
     if os.path.exists(metrics_exe):
         parent_dir = os.path.dirname(os.getcwd())
         output = subprocess.run(metrics_call, cwd=parent_dir, capture_output=True, text=True, check=True)
-        print(output.stdout)
-        return "Metrics Started"
+        if output.stderr:
+            return output.stderr
+        else:
+            return output.stdout
     else:
         return "Can't Find Metrics Executable"
 
 
-def prune_data():
+def prune_data(years="1", months="0", weeks="0", days="0"):
+    if not years.isdigit():
+        years = "1"
+    if not months.isdigit():
+        months = "0"
+    if not weeks.isdigit():
+        weeks = "0"
+    if not days.isdigit():
+        days = "0"
+
     metrics_exe = get_metrics_exe()
-    metrics_call = [metrics_exe, "prune-now"]
+    metrics_call = [metrics_exe, "prune-now", "--lifetime", f"{str(years)}y{str(months)}m{str(weeks)}w{str(days)}d"]
     if os.path.exists(metrics_exe):
         parent_dir = os.path.dirname(os.getcwd())
         output = subprocess.run(metrics_call, cwd=parent_dir, capture_output=True, text=True, check=True)
