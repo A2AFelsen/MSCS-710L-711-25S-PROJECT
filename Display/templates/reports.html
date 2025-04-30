@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quadrant Dashboard</title>
+
+    <!-- Loading chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Loading bootstrap to assist with page style -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     <style>
+        /*
+        ============================================================
+        = Font Sizing: Allows for the controlling of the font size =
+        ============================================================
+        */
         :root {
             --global-font-size: 16px;
         }
@@ -20,37 +28,11 @@
             font-size: var(--global-font-size);
         }
 
-        .quadrant-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 15px;
-            padding: 20px;
-            height: 90vh;
-        }
-
-        .quadrant {
-            border: 1px solid #ccc;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-width: 300px;
-            max-width: 100%;
-        }
-
-        canvas {
-            width: auto !important;
-            height: auto !important;
-            max-height: 300px;
-        }
-
-        select.form-select {
-            width: 90%;
-            margin-bottom: 10px;
-        }
-
+        /*
+        =============================================================
+        = Top Bar-Group: Includes web navigation and font drop down =
+        =============================================================
+        */
         .top-bar {
             display: flex;
             align-items: center;
@@ -67,10 +49,56 @@
             align-items: center;
             gap: 8px;
         }
+
+        /*
+        ========================================================
+        = Quadrant-Group: Controls the Layout for the 4 graphs =
+        ========================================================
+        */
+        .quadrant-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 equal width columns, each 1 fraction of the available space */
+            grid-template-rows: 1fr 1fr; /* 2 equal height rows, each 1 fraction of the available space */
+            gap: 15px;
+            padding: 20px;
+            height: 90vh; /* 90% of viewport height to help make it fit on any monitor */
+        }
+
+        .quadrant {
+            border: 1px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-width: 300px;
+            max-width: 100%;
+        }
+
+        /*
+        ========================================================
+        = Date-Range: The start and stop points for each graph =
+        ========================================================
+        */
+        .date-range-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            width: auto !important; /* Automatically adjust and override any other style */
+            height: auto !important;
+            max-height: 250px;
+        }
     </style>
 </head>
+
 <body>
 
+    <!-- Adding in the top-bar which includes the web navigation and font size drop down -->
     <div class="top-bar">
         <button class="return-button" onclick="window.location.href='/'">Home</button>
         <form action="/user_report" method="post" style="display:inline;">
@@ -83,7 +111,7 @@
             <button>The Gathering</button>
         </form>
 
-        <!-- Font Size Selector -->
+        <!-- We give a selection of font sizes for the user to choose from -->
         <div class="font-select-wrapper">
             <label for="fontSizeSelect">Font Size:</label>
             <select id="fontSizeSelect" class="form-select" style="width: auto;">
@@ -94,39 +122,31 @@
                 <option value="28">Colossal</option>
             </select>
         </div>
-
-        <!-- Start and End Date Selection -->
-        <form style="padding: 0 20px;">
-            <label for="num1">Start Date:</label>
-            <select name="num1" id="num1">
-                {% for i in range(max_datapoints) %}
-                    <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-            </select>
-
-            <label for="num2">End Date:</label>
-            <select name="num2" id="num2">
-                {% for i in range(max_datapoints) %}
-                    <option value="{{ i }}" {% if i == max_datapoints-1 %}selected{% endif %}>{{ i }}</option>
-                {% endfor %}
-            </select>
-        </form>
     </div>
 
-    <!-- Quadrants -->
+    <!-- Setting up the Quadrants for each graph -->
     <div class="quadrant-container">
+        <!-- Take the dictionary that is given and create a list of keys.
+             The Keys are the serial number of each component and the component type.
+             'test_cpu (CPU)' for example -->
         {% set dataset_keys = datasets.keys() | list %}
+
+        <!-- We have 4 quadrants so go through each one by one -->
         {% for i in range(4) %}
-        <div class="quadrant" id="quad{{ i + 1 }}">
-            <select class="form-select dataset-select" id="select-dataset{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}')">
+        <div class="quadrant" id="quad{{ i }}">
+            <!-- When we change something in a quadrant we want to call updateChart and pass it the current quadrant -->
+            <select class="form-select dataset-select" id="select-dataset{{ i }}" onchange="updateChart('chart{{ i }}')">
+                <!-- Go through the list of keys -->
                 {% for dataset_name in dataset_keys %}
-                    <option value="{{ dataset_name }}" {% if loop.index0 == i %}selected{% endif %}>
-                        {{ dataset_name }}
-                    </option>
+                    <!-- This ensures that each quadrant will default to a different key -->
+                    <option value="{{ dataset_name }}" {% if loop.index0 == i %}selected{% endif %}>{{ dataset_name }}</option>
                 {% endfor %}
             </select>
 
-            <select class="form-select column-select" id="select-column{{ i + 1 }}" onchange="updateChart('chart{{ i + 1 }}')">
+            <!-- Manually adding in the different collected metrics to select between. -->
+            <!-- Would be nice in the future to do add these automatically. -->
+            <!-- And again here we want to update the quadrant that we change -->
+            <select class="form-select column-select" id="select-column{{ i }}" onchange="updateChart('chart{{ i }}')">
                 <option value="1">Temperature (C)</option>
                 <option value="2">% Usage</option>
                 <option value="3">Power Consumption (W)</option>
@@ -135,33 +155,59 @@
                 <option value="6">Total Ram Used (MB)</option>
             </select>
 
-            <canvas id="chart{{ i + 1 }}"></canvas>
+            <!-- The dropdown menus for the start and end points -->
+            <div class="date-range-controls">
+                <label for="start{{ i }}">Start:</label>
+                <select id="start{{ i }}" onchange="updateChart('chart{{ i }}')">
+                    <!-- Going through the number of datapoints and adding in each index for start -->
+                    {% for j in range(max_datapoints) %}
+                        <option value="{{ j }}">{{ j }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="end{{ i }}">End:</label>
+                <select id="end{{ i }}" onchange="updateChart('chart{{ i }}')">
+                    <!-- Going through the number of datapoints and adding in each index for end -->
+                    <!-- This time though we set the end value to the final datapoint as a default -->
+                    {% for j in range(max_datapoints) %}
+                        <option value="{{ j }}" {% if j == max_datapoints-1 %}selected{% endif %}>{{ j }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Set up the 'drawing area' for each quadrant -->
+            <canvas id="chart{{ i }}"></canvas>
         </div>
         {% endfor %}
     </div>
 
+
     <script>
+        // Convert the dataset dictionaries to json
         const chartData = {{ datasets | tojson | safe }};
+        const charts = {};
+        // Converts the font size to a number.
+        const defaultFontSize = parseInt(document.getElementById("fontSizeSelect").value);
 
-        function generateLabels(datasetName, start, end) {
-            if (!chartData[datasetName]) return [];
-            return chartData[datasetName].slice(start, end + 1).map(item => item[0]);
-        }
-
+        // Create each chart
         function createChart(chartId, datasetName, columnIndex = 1, start = 0, end = chartData[datasetName].length - 1, fontSize = 16) {
+            // Gets the canvas id and it's contents
             const ctx = document.getElementById(chartId).getContext('2d');
-
+            // This is used to get the slice of data based on the start and end drop downs.
             const rawData = chartData[datasetName].slice(start, end + 1);
 
-            // Filter out invalid (non-numeric) points
+            // Filters out data that isn't numbers.
             const filtered = rawData.filter(item => {
                 const val = item[columnIndex];
                 return typeof val === 'number' && isFinite(val);
             });
 
+            // grabs values for x-axis
             const labels = filtered.map(item => item[0]);
+            // grabs values for y-axis
             const dataPoints = filtered.map(item => item[columnIndex]);
 
+            // Creates a new line chart setting its labels and layout, etc.
             return new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -172,100 +218,72 @@
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 2,
-                        fill: false
+                        fill: false // Does not fill the area under the line.
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true,           // forces chart to fit in the container.
+                    maintainAspectRatio: false, // Does not force the aspect ratio so the chart can be stretched.
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: false
-                        }
+                        legend: { display: false }, // Don't display the legend
+                        title: { display: false }   // Don't display the title (which can be seen in the drop down)
                     },
                     scales: {
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: fontSize
-                                }
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                font: {
-                                    size: fontSize
-                                }
-                            }
-                        }
+                        x: { ticks: { font: { size: fontSize } } }, // Allows for the font re-sizing of the x-axis
+                        y: { ticks: { font: { size: fontSize } } }  // Allows for the font re-sizing of the y-axis
                     }
                 }
             });
         }
 
+        // Updates the charts whenever one of the dropdown menus in the quadrant is updated.
         function updateChart(chartId) {
-            const index = chartId.replace("chart", "");
+            const index = chartId.replace("chart", ""); // removes the 'chart' from 'chart1'
             const datasetName = document.getElementById(`select-dataset${index}`).value;
             const columnIndex = parseInt(document.getElementById(`select-column${index}`).value);
-            const num1 = parseInt(document.getElementById("num1").value);
-            const num2 = parseInt(document.getElementById("num2").value);
+            const start = parseInt(document.getElementById(`start${index}`).value);
+            const end = parseInt(document.getElementById(`end${index}`).value);
             const fontSize = parseInt(document.getElementById("fontSizeSelect").value);
 
+            // The start should never be less than the end value, so we alert here.
+            if (start > end) {
+                alert("Start date must be less than or equal to end date.");
+                return;
+            }
+
+            // Remove the old chart, so we can create a new one with the updated values.
             charts[chartId].destroy();
-            charts[chartId] = createChart(chartId, datasetName, columnIndex, num1, num2, fontSize);
+            // Creates a new chart with the updated values.
+            charts[chartId] = createChart(chartId, datasetName, columnIndex, start, end, fontSize);
         }
 
-        const charts = {};
-        const defaultFontSize = parseInt(document.getElementById("fontSizeSelect").value);
-
+        // Loop through each canvas when the page loads (this is not part of any function)
         document.querySelectorAll("canvas").forEach((canvas, index) => {
-            const datasetName = document.getElementById(`select-dataset${index + 1}`).value;
-            charts[canvas.id] = createChart(canvas.id, datasetName, 1, 0, chartData[datasetName].length - 1, defaultFontSize);
+            const datasetName = document.getElementById(`select-dataset${index}`).value;
+            // Initialize each chart with default values
+            charts[canvas.id] = createChart(
+                canvas.id,
+                datasetName,
+                1,
+                0,
+                chartData[datasetName].length - 1,
+                defaultFontSize
+            );
         });
 
+        // Add the event listener for the font size updater.
         document.getElementById("fontSizeSelect").addEventListener("change", function () {
+            // Convert the string value to an int.
             const newFontSize = parseInt(this.value);
+            // Sets the global font size
             document.documentElement.style.setProperty('--global-font-size', `${newFontSize}px`);
 
+            // Go through each chart and update the charts with the new font size
             Object.keys(charts).forEach(chartId => {
-                const index = chartId.replace("chart", "");
-                const datasetName = document.getElementById(`select-dataset${index}`).value;
-                const columnIndex = parseInt(document.getElementById(`select-column${index}`).value);
-                const num1 = parseInt(document.getElementById("num1").value);
-                const num2 = parseInt(document.getElementById("num2").value);
-
-                charts[chartId].destroy();
-                charts[chartId] = createChart(chartId, datasetName, columnIndex, num1, num2, newFontSize);
+                updateChart(chartId);
             });
         });
-
-        document.getElementById("num1").addEventListener("change", () => {
-            const num1 = parseInt(document.getElementById("num1").value);
-            const num2 = parseInt(document.getElementById("num2").value);
-
-            if (num1 > num2) {
-                alert("Start date must be less than or equal to end date.");
-                return;
-            }
-
-            Object.keys(charts).forEach(chartId => updateChart(chartId));
-        });
-
-        document.getElementById("num2").addEventListener("change", () => {
-            const num1 = parseInt(document.getElementById("num1").value);
-            const num2 = parseInt(document.getElementById("num2").value);
-
-            if (num1 > num2) {
-                alert("Start date must be less than or equal to end date.");
-                return;
-            }
-
-            Object.keys(charts).forEach(chartId => updateChart(chartId));
-        });
-
     </script>
+
 </body>
 </html>
