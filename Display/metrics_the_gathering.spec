@@ -27,7 +27,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='test_metrics',
+    name='metrics_the_gathering',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
