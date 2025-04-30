@@ -51,6 +51,12 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
+      - name: Install Psutil
+        run: pip install psutil
+
+      - name: Install Flask
+        run: pip install flask
+
       - name: Build Python EXE with PyInstaller
         run: |
           cd Display
