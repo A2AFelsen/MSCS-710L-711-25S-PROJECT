@@ -8,9 +8,10 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -19,7 +20,9 @@ jobs:
 
       - name: Get current date
         id: date
-        run: echo "date=$(date +'%Y.%m.%d')" >> "$GITHUB_OUTPUT"
+        run: |
+          $date = Get-Date -Format "yyyy.MM.dd"
+          echo "date=$date" >> $env:GITHUB_OUTPUT
 
       - name: Download .NET 4.8 Artifact
         uses: dawidd6/action-download-artifact@v6
@@ -33,24 +36,42 @@ jobs:
 
       - name: Verify Artifact Download
         run: |
-          echo "Contents of release_files:"
-          ls -R release_files
-          if [ ! -f "release_files/OpenHardwareMonitor.exe" ]; then
-            echo "Error: OpenHardwareMonitor.exe not found!"
+          Write-Host "Contents of release_files:"
+          Get-ChildItem -Recurse release_files
+          if (-Not (Test-Path "release_files/OpenHardwareMonitor.exe")) {
+            Write-Error "Error: OpenHardwareMonitor.exe not found!"
             exit 1
-          fi
+          }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Install Psutil
+        run: pip install psutil
+
+      - name: Install Flask
+        run: pip install flask
+
+      - name: Build Python EXE with PyInstaller
+        run: |
+          cd Display
+          pyinstaller metrics_the_gathering.spec
+          copy dist\metrics_the_gathering.exe ..\release_files\
 
       - name: Prepare Display Files
         run: |
-          mkdir -p release_files/Display
-          cp -r Display/* release_files/Display/
-          rm -rf release_files/Display/__pycache__
-          rm -f release_files/Display/*.pyc
+          New-Item -ItemType Directory -Force -Path release_files\Display
+          Copy-Item -Path Display\* -Destination release_files\Display -Recurse -Force
+          Remove-Item -Path release_files\Display\__pycache__ -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path release_files\Display\*.pyc -Force -ErrorAction SilentlyContinue
 
       - name: Create Zip Package
-        run: |
-          cd release_files
-          zip -r ../OpenHardwareMonitor-Release.zip ./*
+        run: Compress-Archive -Path release_files\* -DestinationPath OpenHardwareMonitor-Release.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
