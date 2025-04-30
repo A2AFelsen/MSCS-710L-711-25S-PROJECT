@@ -40,6 +40,20 @@ jobs:
             exit 1
           fi
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build Python EXE with PyInstaller
+        run: |
+          cd Display
+          pyinstaller metrics_the_gathering.spec
+          cp dist/metrics_the_gathering.exe ../release_files/
+
       - name: Prepare Display Files
         run: |
           mkdir -p release_files/Display
