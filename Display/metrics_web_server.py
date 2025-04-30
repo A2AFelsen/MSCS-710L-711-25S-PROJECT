@@ -6,11 +6,10 @@
 # v0.1.0 Can now pull data from the interface script and pass it to the user_report page  #
 # v0.1.1 Removing unnecessary imports as well as socketio since we don't need to talk to  #
 #        other instances.                                                                 #
-###########################################################################################
-# TODO:                                                                                   #
+# v1.0.0 Initial Production version. mthuffer 2025-04-30                                  #
 ###########################################################################################
 
-import read_database
+import db_interface
 import ohm_interface
 from flask import Flask, render_template, request
 
@@ -18,21 +17,29 @@ from flask import Flask, render_template, request
 app = Flask(__name__)
 
 
-# index.html is the standard default case.
 @app.route("/")
 def index():
+    """Default Case: index.html"""
     return render_template("index.html")
 
 
 @app.route("/gather", methods=["POST"])
 def gather_report():
+    """Calls the Gathering. User interface for metrics collection"""
     return render_template("gather.html")
 
 
 @app.route("/user_report", methods=["POST"])
 def user_report():
+    """Calls reports.html. Show graphs of metrics."""
+    # Debug value for testing purposes. Default 0 since we should only get a debug flag in testing.
     debug = request.form.get("debug", type=int, default=0)
-    datasets = read_database.read_metrics(debug)
+
+    # Get the data from db_interface.
+    # Should be a dictionary where the key is the serial_number + component and the value is a list of metrics.
+    datasets = db_interface.read_metrics(debug)
+
+    # Find the max datapoints, so we can set the 'end' value when loading the page.
     max_datapoints = max((len(lst) for lst in datasets.values()), default=0)
     return render_template(
         "reports.html", datasets=datasets, max_datapoints=max_datapoints
@@ -41,8 +48,12 @@ def user_report():
 
 @app.route("/proc_table", methods=["POST"])
 def proc_table():
+    """Calls processes.html. Shows a table of the processes"""
+    # Debug value for testing purposes. Default 0 since we should only get a debug flag in testing.
     debug = request.form.get("debug", type=int, default=0)
-    data = read_database.read_processes(debug)
+
+    # Get the data from db_interface. Simply a tuple from the SQL command
+    data = db_interface.read_processes(debug)
     return render_template(
         "processes.html", data=data
     )
@@ -50,24 +61,26 @@ def proc_table():
 
 @app.route("/metrics", methods=['POST'])
 def run_metrics():
+    """Sets up the metrics executable when called."""
+    # Get user data.
     data = request.get_json()
     years = data.get('years')
     months = data.get('months')
     weeks = data.get('weeks')
     days = data.get('days')
-    job = data.get('job')
+    job = data.get('job')  # Should either be 'collect' or 'prune'
 
+    # If we are pruning then we call the prune method
     if job == 'prune':
         return ohm_interface.prune_data(years, months, weeks, days)
 
+    # If we aren't pruning we should be collecting. First check if the metrics is already running.
+    # This will stop the collector if it is currently running.
     if ohm_interface.is_metrics_running():
         return "Metrics Stopped"
+
+    # Otherwise call the collector
     return ohm_interface.call_executable(years, months, weeks, days)
-
-
-@app.route("/prune-now", methods=['POST'])
-def prune_metrics():
-    return ohm_interface.prune_data()
 
 
 if __name__ == "__main__":
