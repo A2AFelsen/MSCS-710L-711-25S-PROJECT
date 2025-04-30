@@ -8,7 +8,7 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
     steps:
@@ -19,6 +19,7 @@ jobs:
 
       - name: Get current date
         id: date
+        shell: bash
         run: echo "date=$(date +'%Y.%m.%d')" >> "$GITHUB_OUTPUT"
 
       - name: Download .NET 4.8 Artifact
@@ -32,6 +33,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify Artifact Download
+        shell: bash
         run: |
           echo "Contents of release_files:"
           ls -R release_files
@@ -46,15 +48,18 @@ jobs:
           python-version: '3.11'
 
       - name: Install PyInstaller
+        shell: bash
         run: pip install pyinstaller
 
       - name: Build Python EXE with PyInstaller
         run: |
+          pip install pyinstaller
           cd Display
           pyinstaller metrics_the_gathering.spec
-          cp dist/metrics_the_gathering.exe ../release_files/
+          copy dist\\metrics_the_gathering.exe ..\\release_files\\
 
       - name: Prepare Display Files
+        shell: bash
         run: |
           mkdir -p release_files/Display
           cp -r Display/* release_files/Display/
@@ -62,6 +67,7 @@ jobs:
           rm -f release_files/Display/*.pyc
 
       - name: Create Zip Package
+        shell: bash
         run: |
           cd release_files
           zip -r ../OpenHardwareMonitor-Release.zip ./*
