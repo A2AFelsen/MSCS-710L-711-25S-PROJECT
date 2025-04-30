@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gatherer</title>
     <style>
+        /*
+        ================================
+        = Button-Group: Web Navigation =
+        ================================
+        */
         .button-group {
             text-align: center;
             margin-bottom: 20px;
@@ -18,9 +23,14 @@
             cursor: pointer;
        }
 
+        /*
+        =====================================
+        = Metrics-Group: Collect User Input =
+        =====================================
+        */
         .metrics-group {
             text-align: center;
-           margin-bottom: 20px;
+            margin-bottom: 20px;
         }
 
         .metrics-group .form-row {
@@ -31,29 +41,42 @@
         }
 
         .metrics-group label {
-            width: 80px; /* Fixed width for label */
+            width: 80px;
             text-align: right;
             margin-right: 10px;
             font-weight: bold;
         }
 
         .metrics-group input {
-            width: 25px; /* Fixed width for input */
+            width: 25px;
             padding: 5px;
             font-size: 16px;
         }
 
-        .metrics-group button {
-            margin-top: 20px;
+        /*
+        ================================
+        = Exe-Group: Execute Collector =
+        ================================
+        */
+        .exe-group {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .exe-group button {
             padding: 10px 20px;
+            margin: 5px;
             font-size: 16px;
             border-radius: 6px;
             cursor: pointer;
+       }
     </style>
 </head>
-<body>
-<h2 style="text-align:center;">The Gathering!</h2>
 
+<body>
+    <h2 style="text-align:center;">The Gathering!</h2>
+
+    <!-- Adding Buttons for Web Navigation -->
     <div class="button-group">
         <button class="return-button" onclick="window.location.href='/'">Home</button>
         <form action="/gather" method="post" style="display:inline;">
@@ -67,59 +90,82 @@
         </form>
     </div>
 
+    <!-- Adding Labels and input text boxes for User Input. -->
+    <!-- Years are defaulted to 1 and all others are defaulted to 0. The default end of life for collection is 1 year -->
     <div class="metrics-group">
         <div class="form-row">
             <label for="years">Years</label>
-            <input type="Text" name="years" id="years" maxlength="2" value="1">
+            <input type="Text" name="years" id="years" maxlength="2" value="1" placeholder="0">
         </div>
 
         <div class="form-row">
             <label for="months">Months</label>
-            <input type="Text" name="months" id="months" maxlength="2" value="0">
+            <input type="Text" name="months" id="months" maxlength="2" value="0" placeholder="0">
         </div>
 
         <div class="form-row">
             <label for="weeks">Weeks</label>
-            <input type="Text" name="weeks" id="weeks" maxlength="2" value="0">
+            <input type="Text" name="weeks" id="weeks" maxlength="2" value="0" placeholder="0">
         </div>
 
         <div class="form-row">
             <label for="days">Days</label>
-            <input type="Text" name="days" id="days" maxlength="2" value="0">
+            <input type="Text" name="days" id="days" maxlength="2" value="0" placeholder="0">
         </div>
+    </div>
 
-        <button onclick="runExe()">Toggle Metrics</button>
-        <button onclick="prune()">Prune Now!</button>
+    <!-- Adding Buttons to call the executable -->
+    <div class="exe-group">
+        <!-- Toggles the metrics collector on and off -->
+        <button onclick="runExe('collect')">Toggle Metrics</button>
+        <!-- Will cause an immediate Pruning of data that is past end of life -->
+        <button onclick="runExe('prune')">Prune Now!</button>
     </div>
 
     <script>
-        function runExe() {
+        // Blur event (when an object loses focus) to replace an emtpy user field with 0.
+        function fixEmptyOnBlur(event) {
+            // Get the element that triggered the event.
+            const input = event.target;
+            // If the element is empty set it to 0.
+            if (input.value.trim() === "") {
+                input.value = "0";
+            }
+        }
+
+        // Attach blur event to all user input fields. Runs the function when they blur.
+        window.onload = function() {
+            document.getElementById('years').addEventListener('blur',  fixEmptyOnBlur);
+            document.getElementById('months').addEventListener('blur', fixEmptyOnBlur);
+            document.getElementById('weeks').addEventListener('blur',  fixEmptyOnBlur);
+            document.getElementById('days').addEventListener('blur',   fixEmptyOnBlur);
+        }
+
+        // Runs the metrics route in the web app.
+        function runExe(job) {
+            // Collect all the user inputs.
             const years  = document.getElementById('years').value;
             const months = document.getElementById('months').value;
             const weeks  = document.getElementById('weeks').value;
             const days   = document.getElementById('days').value;
 
+            // Call the metrics route and send the data over in json format.
             fetch('/metrics', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ years: years, months: months, weeks: weeks, days: days })
+                body: JSON.stringify({ years: years,
+                                       months: months,
+                                       weeks: weeks,
+                                       days: days,
+                                       job: job })
             })
             .then(response => response.text())
             .then(data => alert(data))
             .catch(error => alert("Error: " + error));
         }
 
-        function prune() {
-            fetch('/prune-now', {
-                method: 'POST'
-            })
-            .then(response => response.text())
-            .then(data => alert(data))
-            .catch(error => alert("Error: " + error));
-        }
     </script>
-
 </body>
 </html>
