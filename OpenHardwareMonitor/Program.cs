@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Management;
 using System.Security.Principal;
 using System.Timers;
@@ -16,42 +17,44 @@ namespace OpenHardwareMonitor
 
         static void Main(string[] args)
         {
-            TimeSpan dataLifetime = TimeSpan.FromDays(365); // Default to 1 year, changed via --lifetime arg
             try
             {
-                if (args.Length > 0)
+                TimeSpan dataLifetime = TimeSpan.FromDays(365); // Default to 1 year, changed via --lifetime arg
+                for (int i = 0; i < args.Length; i++)
                 {
-                    try
+                    if (args[i] == "init-db")
                     {
-                        if (args[0] == "init-db")
-                        {
-                            DatabaseHelper.InitializeDatabase();
-                            Console.WriteLine("Database initialized.");
-                            return;
-                        }
-                        else if (args[0] == "clear-db")
-                        {
-                            DatabaseHelper.InitializeDatabase();
-                            DatabaseHelper.ClearDatabase();
-                            Console.WriteLine("Database cleared.");
-                            return;
-                        }
-                        else if (args[0] == "--lifetime" && args.Length > 1)
-                        {
-                            dataLifetime = ParseLifetimeArgument(args[1]);
-                            Console.WriteLine($"Data lifetime set to: {dataLifetime.TotalDays} days");
-                        }
-                        else if (args[0] == "prune-now")
-                        {
-                            DatabaseHelper.InitializeDatabase();
-                            DatabaseHelper.PruneOldData(dataLifetime);
-                            Console.WriteLine("Data pruning completed.");
-                            return;
-                        }
+                        DatabaseHelper.InitializeDatabase();
+                        Console.WriteLine("Database initialized.");
+                        return;
                     }
-                    catch (Exception ex)
+                    else if (args[i] == "clear-db")
                     {
-                        Console.WriteLine($"Error processing arguments: {ex.Message}");
+                        DatabaseHelper.InitializeDatabase();
+                        DatabaseHelper.ClearDatabase();
+                        Console.WriteLine("Database cleared.");
+                        return;
+                    }
+                    else if (args[i] == "--lifetime" && i + 1 < args.Length)
+                    {
+                        dataLifetime = ParseLifetimeArgument(args[i + 1]);
+                        Console.WriteLine($"Data lifetime set to: {dataLifetime.TotalDays} days");
+                        System.Threading.Thread.Sleep(5000);
+                        i++; // Skip the next argument since we've processed it
+                    }
+                    else if (args[i] == "prune-now")
+                    {
+                        // Allow override: "./OpenHardwareMonitor.exe prune-now --lifetime 30d"
+                        if (i + 1 < args.Length && args[i + 1] == "--lifetime" && i + 2 < args.Length)
+                        {
+                            dataLifetime = ParseLifetimeArgument(args[i + 2]);
+                            i += 2; // Skip next two args
+                        }
+
+                        DatabaseHelper.InitializeDatabase();
+                        DatabaseHelper.PruneOldData(dataLifetime);
+                        Console.WriteLine($"Pruned data older than {dataLifetime.TotalDays} days.");
+                        return;
                     }
                 }
 
@@ -154,20 +157,36 @@ namespace OpenHardwareMonitor
             if (string.IsNullOrWhiteSpace(arg))
                 throw new ArgumentException("Lifetime argument cannot be empty");
 
-            char unit = arg[arg.Length - 1]; // Changed from ^1
-            string numberPart = arg.Substring(0, arg.Length - 1); // Changed from 0..^1
+            TimeSpan total = TimeSpan.Zero;
 
-            if (!int.TryParse(numberPart, out int value))
+            // Split the argument into parts (e.g., "1m2w3d" -> ["1m", "2w", "3d"])
+            var parts = System.Text.RegularExpressions.Regex.Matches(arg, @"(\d+[dwmy])")
+                .Cast<System.Text.RegularExpressions.Match>()
+                .Select(m => m.Value)
+                .ToList();
+
+            if (parts.Count == 0)
                 throw new ArgumentException("Invalid lifetime format");
 
-            switch (unit)
+            foreach (var part in parts)
             {
-                case 'd': return TimeSpan.FromDays(value);
-                case 'w': return TimeSpan.FromDays(value * 7);
-                case 'm': return TimeSpan.FromDays(value * 30);
-                case 'y': return TimeSpan.FromDays(value * 365);
-                default: throw new ArgumentException("Unknown lifetime unit. Use d, w, m, or y");
+                char unit = part[part.Length - 1];
+                string numberPart = part.Substring(0, part.Length - 1);
+
+                if (!int.TryParse(numberPart, out int value))
+                    throw new ArgumentException($"Invalid number in lifetime segment: {part}");
+
+                switch (unit)
+                {
+                    case 'd': total += TimeSpan.FromDays(value); break;
+                    case 'w': total += TimeSpan.FromDays(value * 7); break;
+                    case 'm': total += TimeSpan.FromDays(value * 30); break;
+                    case 'y': total += TimeSpan.FromDays(value * 365); break;
+                    default: throw new ArgumentException($"Unknown lifetime unit '{unit}'. Use d, w, m, or y");
+                }
             }
+
+            return total;
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e, TimeSpan dataLifetime)
@@ -477,9 +496,12 @@ namespace OpenHardwareMonitor
 
         public static Action RelaunchAsAdministrator = () =>
         {
+            Console.WriteLine("Program requires administrator privileges. Relaunching...");
+            System.Threading.Thread.Sleep(2000);
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
             procInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
+            procInfo.Arguments = string.Join(" ", Environment.GetCommandLineArgs().Skip(1)); // preserve arguments
             procInfo.Verb = "runas";
 
             try
