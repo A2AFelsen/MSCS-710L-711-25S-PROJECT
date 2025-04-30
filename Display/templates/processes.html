@@ -11,6 +11,27 @@
 
     <style>
         /*
+        ============================================================
+        = Font Sizing: Allows for the controlling of the font size =
+        ============================================================
+        */
+        :root {
+            --global-font-size: 16px;
+        }
+
+        body, label, select, button, .form-select {
+            font-size: var(--global-font-size);
+        }
+
+        .font-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        /*
         ================================
         = Button-Group: Web Navigation =
         ================================
@@ -74,6 +95,18 @@
         </form>
     </div>
 
+    <!-- Adding in the font size drop down -->
+    <div class="font-dropdown">
+        <label for="fontSizeSelect">Font Size:</label>
+        <select id="fontSizeSelect" class="form-select" style="width: auto;">
+            <option value="12">Small</option>
+            <option value="16" selected>Medium</option>
+            <option value="20">Large</option>
+            <option value="24">Extra Large</option>
+            <option value="28">Colossal</option>
+        </select>
+    </div>
+
     <!-- Setting up the table to display the processes -->
     <div class="table-wrapper">
         <table id="proc-table" class="display">
@@ -109,6 +142,14 @@
         $(document).ready(function() {
             $('#proc-table').DataTable();
         });
+
+        // Font Drop down.
+        document.getElementById("fontSizeSelect").addEventListener("change", function () {
+            // Convert font string to font int.
+            const newFontSize = parseInt(this.value);
+            document.documentElement.style.setProperty('--global-font-size', `${newFontSize}px`);
+        });
+
     </script>
 </body>
 </html>

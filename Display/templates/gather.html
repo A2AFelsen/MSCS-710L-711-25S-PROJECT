@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gatherer</title>
     <style>
+        :root {
+            --global-font-size: 16px;
+        }
+
+        body, label, input, button {
+            font-size: var(--global-font-size);
+        }
+
+        .font-dropdown {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-select {
+            padding: 5px;
+        }
+
         /*
         ================================
         = Button-Group: Web Navigation =
@@ -13,15 +33,14 @@
         .button-group {
             text-align: center;
             margin-bottom: 20px;
-       }
+        }
 
         .button-group button {
             padding: 10px 20px;
             margin: 5px;
-            font-size: 16px;
             border-radius: 6px;
             cursor: pointer;
-       }
+        }
 
         /*
         =====================================
@@ -50,7 +69,6 @@
         .metrics-group input {
             width: 25px;
             padding: 5px;
-            font-size: 16px;
         }
 
         /*
@@ -66,15 +84,26 @@
         .exe-group button {
             padding: 10px 20px;
             margin: 5px;
-            font-size: 16px;
             border-radius: 6px;
             cursor: pointer;
-       }
+        }
     </style>
 </head>
 
 <body>
     <h2 style="text-align:center;">The Gathering!</h2>
+
+    <!-- Adding Font Size Dropdown -->
+    <div class="font-dropdown">
+        <label for="fontSizeSelect">Font Size:</label>
+        <select id="fontSizeSelect" class="form-select">
+            <option value="12">Small</option>
+            <option value="16" selected>Medium</option>
+            <option value="20">Large</option>
+            <option value="24">Extra Large</option>
+            <option value="28">Colossal</option>
+        </select>
+    </div>
 
     <!-- Adding Buttons for Web Navigation -->
     <div class="button-group">
@@ -91,7 +120,7 @@
     </div>
 
     <!-- Adding Labels and input text boxes for User Input. -->
-    <!-- Years are defaulted to 1 and all others are defaulted to 0. The default end of life for collection is 1 year -->
+    <!-- Years defaulted to 1 and all others are defaulted to 0. The default end of life for collection is 1 year -->
     <div class="metrics-group">
         <div class="form-row">
             <label for="years">Years</label>
@@ -155,17 +184,25 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ years: years,
-                                       months: months,
-                                       weeks: weeks,
-                                       days: days,
-                                       job: job })
+                body: JSON.stringify({
+                    years: years,
+                    months: months,
+                    weeks: weeks,
+                    days: days,
+                    job: job
+                })
             })
             .then(response => response.text())
             .then(data => alert(data))
             .catch(error => alert("Error: " + error));
         }
 
+        // Font size dropdown.
+        document.getElementById("fontSizeSelect").addEventListener("change", function () {
+            // Convert font string to font int.
+            const newFontSize = parseInt(this.value);
+            document.documentElement.style.setProperty('--global-font-size', `${newFontSize}px`);
+        });
     </script>
 </body>
 </html>
