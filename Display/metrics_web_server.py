@@ -11,10 +11,20 @@
 
 import db_interface
 import ohm_interface
+import sys
+import os
 from flask import Flask, render_template, request
 
-# Set up the Flask instance
-app = Flask(__name__)
+# If running as an executable (to set up for pyinstaller)
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.join(db_interface.get_proj_root(), "Display")
+
+# Set up the Flask instance based on what type of run we are.
+app = Flask(__name__,
+            template_folder=os.path.join(base_path, 'templates'),
+            static_folder=os.path.join(base_path, 'static'))
 
 
 @app.route("/")

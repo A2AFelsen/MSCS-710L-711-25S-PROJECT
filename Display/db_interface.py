@@ -12,6 +12,7 @@ import sqlite3
 import datetime
 import glob
 import shutil
+import pathlib
 
 
 def create_mtg_database(conn):
@@ -115,35 +116,70 @@ def get_git_root():
         # Otherwise return None
         return None
 
+    return None
+
+
+def rebuild_path(split_path):
+    """Rebuilds the path to find out where the root is."""
+    # Directories or part of their names we care about
+    dirs = ["MSCS-710L-711-25S-PROJECT", "OpenHardwareMonitor"]
+
+    rebuilt_path = ""
+
+    # Go through the split path section by section
+    # Rebuilding the path as we go.
+    for i, component in enumerate(split_path):
+        if i == 0:
+            rebuilt_path = component
+        else:
+            rebuilt_path += f"/{component}"
+
+        # Check to see if the current component is flagged by the dirs we care about.
+        # If it is return the new path.
+        for entry in dirs:
+            if entry in component:
+                return rebuilt_path
+
+    # If we get through the whole path and find nothing return cwd
+    return os.getcwd()
+
+
+def get_proj_root():
+    """Finds the project root."""
+    # If we have a git root just use that.
+    if get_git_root():
+        return get_git_root()
+
+    # Otherwise split the path into it's components and try to rebuild it.
+    split_path = list(pathlib.Path(os.getcwd()).parts)
+    return rebuild_path(split_path)
+
 
 def get_database(debug):
     """Returns the path of a database depending on the debug level."""
     # If there is a git root then we set the root to the sample dbs.
     # This is for testing and development.
-    if get_git_root():
-        root = os.path.join(get_git_root(), "Display/tests/sample_dbs")
-    else:
+    root = get_proj_root()
+    if not root:
         root = "."
+    sample_path = "Display/tests/sample_dbs"
 
     if debug == 0:
-        # If we aren't testing we always want the root to be set to the cwd.
-        root = "."
-        # This is production mode so we should get the production db.
-        return os.path.join(root, "../metrics.db")
-    if debug == 1:
         return os.path.join(root, "metrics.db")
-    if debug == 2:
-        return os.path.join(root, "normal.db")
-    if debug == 3:
-        return os.path.join(root, "empty.db")
-    if debug == 4:
-        return os.path.join(root, "missing.db")
-    if debug == 5:
-        return os.path.join(root, "unexpected.db")
-    if debug == 6:
-        return os.path.join(root, "corrupted.db")
+    elif debug == 1:
+        return os.path.join(root, sample_path, "metrics.db")
+    elif debug == 2:
+        return os.path.join(root, sample_path, "normal.db")
+    elif debug == 3:
+        return os.path.join(root, sample_path, "empty.db")
+    elif debug == 4:
+        return os.path.join(root, sample_path, "missing.db")
+    elif debug == 5:
+        return os.path.join(root, sample_path, "unexpected.db")
+    elif debug == 6:
+        return os.path.join(root, sample_path, "corrupted.db")
     else:
-        return os.path.join(root, "metrics.db")
+        return os.path.join(root, sample_path, "metrics.db")
 
 
 def check_db(debug=0):

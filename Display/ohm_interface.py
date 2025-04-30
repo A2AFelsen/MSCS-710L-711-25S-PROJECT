@@ -41,8 +41,7 @@ def get_metrics_exe():
     db_interface.create_backup()
 
     # The executable should be in the directory above the python scripts.
-    parent_dir = os.path.dirname(os.getcwd())
-    return os.path.join(parent_dir, "OpenHardwareMonitor.exe")
+    return os.path.join(db_interface.get_proj_root(), "OpenHardwareMonitor.exe")
 
 
 def call_executable(years="1", months="0", weeks="0", days="0"):
@@ -61,9 +60,9 @@ def call_executable(years="1", months="0", weeks="0", days="0"):
 
     # Check to make sure the executable exists.
     if os.path.exists(metrics_exe):
-        # Run the executable from its own directory.
-        parent_dir = os.path.dirname(os.getcwd())
-        output = subprocess.run(metrics_call, cwd=parent_dir, capture_output=True, text=True, check=True)
+        # Run the executable from top level
+        working_dir = db_interface.get_proj_root()
+        output = subprocess.run(metrics_call, cwd=working_dir, capture_output=True, text=True, check=True)
 
         # If we get an error return the error, otherwise return the stdout.
         # Whatever is returned here will be shown back to the user.
@@ -93,9 +92,9 @@ def prune_data(years="1", months="0", weeks="0", days="0"):
 
     # Check to make sure the executable exists.
     if os.path.exists(metrics_exe):
-        # Run the executable from its own directory.
-        parent_dir = os.path.dirname(os.getcwd())
-        output = subprocess.run(metrics_call, cwd=parent_dir, capture_output=True, text=True, check=True)
+        # Run the executable from top level
+        working_dir = db_interface.get_proj_root()
+        output = subprocess.run(metrics_call, cwd=working_dir, capture_output=True, text=True, check=True)
 
         # If we get an error return the error, otherwise return the stdout.
         # Whatever is returned here will be shown back to the user.
