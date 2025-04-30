@@ -5,32 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Table</title>
 
+    <!-- Found this very easy to use table that comes with a search function and show # of entries built in! -->
     <link rel="stylesheet"
           href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
     <style>
-        .table-wrapper {
-            width: 80%;
-            margin: 50px auto;
-            overflow-x: auto;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        th, td {
-            border: 1px solid #999;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #bbb;
-            font-weight: bold;
-        }
-
+        /*
+        ================================
+        = Button-Group: Web Navigation =
+        ================================
+        */
         .button-group {
             text-align: center;
             margin-bottom: 20px;
@@ -44,11 +28,39 @@
             cursor: pointer;
        }
 
+        /*
+        ==================================
+        = Table-Group: Table Style Setup =
+        ==================================
+        */
+        .table-wrapper {
+            width: 80%;
+            margin: 50px auto;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* Table Header (th) and Table Data (td) */
+        th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #bbb;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h2 style="text-align:center;">MTG Process Table</h2>
 
+    <!-- Setting up the buttons to navigate the web interface -->
     <div class="button-group">
         <button class="return-button" onclick="window.location.href='/'">Home</button>
         <form action="/proc_table" method="post" style="display:inline;">
@@ -62,10 +74,12 @@
         </form>
     </div>
 
+    <!-- Setting up the table to display the processes -->
     <div class="table-wrapper">
-        <table id="data-table" class="display">
+        <table id="proc-table" class="display">
             <thead>
                 <tr>
+                    <!-- Setting the Table Headings/Columns -->
                     <th>PID</th>
                     <th>Time Stamp</th>
                     <th>CPU Usage</th>
@@ -74,6 +88,7 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Go through each piece of data and insert it into the table -->
                 {% for row in data %}
                 <tr>
                     <td>{{ row[0] }}</td>
@@ -87,11 +102,12 @@
         </table>
     </div>
 
+    <!-- Load Javascript code for table interactivity -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#data-table').DataTable();
+            $('#proc-table').DataTable();
         });
     </script>
 </body>
