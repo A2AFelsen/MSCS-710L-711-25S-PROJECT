@@ -48,14 +48,10 @@ def get_metrics_exe():
 def call_executable(years="1", months="0", weeks="0", days="0"):
     """Calls the executable to collect metrics."""
     # Check each user input to sanitize. If user didn't use digits then use default values.
-    if not years.isdigit():
-        years = "1"
-    if not months.isdigit():
-        months = "0"
-    if not weeks.isdigit():
-        weeks = "0"
-    if not days.isdigit():
-        days = "0"
+    years  = years if years.isdigit()  else "1"
+    months = years if months.isdigit() else "1"
+    weeks  = years if weeks.isdigit()  else "1"
+    days   = years if days.isdigit()   else "1"
 
     # Find the metrics executable.
     metrics_exe = get_metrics_exe()
@@ -84,14 +80,10 @@ def call_executable(years="1", months="0", weeks="0", days="0"):
 def prune_data(years="1", months="0", weeks="0", days="0"):
     """Calls the executable to prune old metrics."""
     # Check each user input to sanitize. If user didn't use digits then use default values.
-    if not years.isdigit():
-        years = "1"
-    if not months.isdigit():
-        months = "0"
-    if not weeks.isdigit():
-        weeks = "0"
-    if not days.isdigit():
-        days = "0"
+    years  = years if years.isdigit()  else "1"
+    months = years if months.isdigit() else "1"
+    weeks  = years if weeks.isdigit()  else "1"
+    days   = years if days.isdigit()   else "1"
 
     # Find the metrics executable.
     metrics_exe = get_metrics_exe()
