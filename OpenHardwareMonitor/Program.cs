@@ -26,6 +26,7 @@ namespace OpenHardwareMonitor
                     {
                         DatabaseHelper.InitializeDatabase();
                         Console.WriteLine("Database initialized.");
+                        Logger.Info("Database Initialized");
                         return;
                     }
                     else if (args[i] == "clear-db")
@@ -75,7 +76,6 @@ namespace OpenHardwareMonitor
                     Console.WriteLine("The application will exit.");
                     return;
                 }
-
                 Computer = new Computer
                 {
                     CPUEnabled = true,
@@ -239,6 +239,7 @@ namespace OpenHardwareMonitor
                         {
                             temperature = sensor.Value.Value;
                             Console.WriteLine($"  Temperature: {sensor.Name} = {temperature}°C");
+                            Logger.Info($"  Temperature: {sensor.Name} = {temperature}°C");
                         }
                         // Power monitoring
                         else if (sensor.SensorType == SensorType.Power)

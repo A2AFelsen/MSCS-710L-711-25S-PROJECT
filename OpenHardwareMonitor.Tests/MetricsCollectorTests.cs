@@ -28,13 +28,6 @@ namespace OpenHardwareMonitor.MetricsTests
             _originalSearcher = Program.GetWMISerialNumber;
         }
 
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            // Restore original implementation after each test
-            Program.GetWmiSerialNumber = _originalSearcher;
-        }
-
         public interface IProcessWrapper
         {
             int Id { get; }
