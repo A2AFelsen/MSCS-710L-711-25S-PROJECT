@@ -138,6 +138,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flask
           pip install psutil
+          pip install waitress
 
     - name: Run tests
       run: python Display/tests/master_tester.py
