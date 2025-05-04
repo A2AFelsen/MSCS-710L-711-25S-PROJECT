@@ -57,6 +57,9 @@ jobs:
       - name: Install Flask
         run: pip install flask
 
+      - name: Install Waitress
+        run: pip install waitress
+
       - name: Build Python EXE with PyInstaller
         run: |
           cd Display
