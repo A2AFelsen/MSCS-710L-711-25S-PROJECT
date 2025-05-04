@@ -14,6 +14,8 @@ import ohm_interface
 import sys
 import os
 from flask import Flask, render_template, request
+from waitress import serve
+import webbrowser
 
 # If running as an executable (to set up for pyinstaller)
 if getattr(sys, 'frozen', False):
@@ -94,5 +96,7 @@ def run_metrics():
 
 
 if __name__ == "__main__":
-    from waitress import serve
+    # Opening the app in a web browser.
+    webbrowser.open_new_tab("http://127.0.0.1:8080")
+    # Starting the app.
     serve(app, host="127.0.0.1", port=8080)
