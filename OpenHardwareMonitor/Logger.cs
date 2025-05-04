@@ -3,7 +3,6 @@ using System.IO;
 using System.Diagnostics;
 using System.Configuration;
 using System.Threading;
-using OpenHardwareMonitor.Hardware;
 
 namespace OpenHardwareMonitor
 {
@@ -57,9 +56,6 @@ namespace OpenHardwareMonitor
                     Directory.CreateDirectory(LogDirectory);
                 }
 
-                // Clean up old log files
-                CleanUpOldLogFiles();
-
                 // Create new log file with timestamp
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 FullLogPath = Path.Combine(LogDirectory, $"{LogFilePrefix}{timestamp}{LogFileExtension}");
@@ -75,26 +71,6 @@ namespace OpenHardwareMonitor
             }
         }
 
-        private static void CleanUpOldLogFiles()
-        {
-            try
-            {
-                var logFiles = Directory.GetFiles(LogDirectory, $"{LogFilePrefix}*{LogFileExtension}");
-                if (logFiles.Length > MaxLogFilesToKeep)
-                {
-                    Array.Sort(logFiles);
-                    for (int i = 0; i < logFiles.Length - MaxLogFilesToKeep; i++)
-                    {
-                        try
-                        {
-                            File.Delete(logFiles[i]);
-                        }
-                        catch { /* Ignore deletion errors */ }
-                    }
-                }
-            }
-            catch { /* Ignore cleanup errors */ }
-        }
 
         private static void RotateLogFileIfNeeded()
         {
@@ -204,38 +180,6 @@ namespace OpenHardwareMonitor
                     return ConsoleColor.DarkRed;
                 default:
                     return ConsoleColor.White;
-            }
-        }
-
-        public static void LogHardwareInfo(IHardware hardware)
-        {
-            if (hardware == null) return;
-
-            Debug($"Hardware detected: {hardware.Name} ({hardware.HardwareType})");
-            foreach (var sensor in hardware.Sensors)
-            {
-                Debug($"  Sensor: {sensor.Name} ({sensor.SensorType}) = {sensor.Value?.ToString() ?? "N/A"}");
-            }
-            foreach (var subHardware in hardware.SubHardware)
-            {
-                LogHardwareInfo(subHardware);
-            }
-        }
-
-        public static void LogSystemInfo()
-        {
-            try
-            {
-                Info($"Operating System: {Environment.OSVersion}");
-                Info($"System Directory: {Environment.SystemDirectory}");
-                Info($"Processor Count: {Environment.ProcessorCount}");
-                Info($"System Page Size: {Environment.SystemPageSize} bytes");
-                Info($"Working Set: {Environment.WorkingSet / 1024 / 1024} MB");
-                Info($"Logging to file: {FullLogPath}");
-            }
-            catch (Exception ex)
-            {
-                Error("Failed to log system information", ex);
             }
         }
     }

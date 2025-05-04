@@ -34,12 +34,14 @@ namespace OpenHardwareMonitor
                         DatabaseHelper.InitializeDatabase();
                         DatabaseHelper.ClearDatabase();
                         Console.WriteLine("Database cleared.");
+                        Logger.Info("Database cleared.");
                         return;
                     }
                     else if (args[i] == "--lifetime" && i + 1 < args.Length)
                     {
                         dataLifetime = ParseLifetimeArgument(args[i + 1]);
                         Console.WriteLine($"Data lifetime set to: {dataLifetime.TotalDays} days");
+                        Logger.Info($"Data lifetime set to: {dataLifetime.TotalDays} days");
                         System.Threading.Thread.Sleep(5000);
                         i++; // Skip the next argument since we've processed it
                     }
@@ -55,6 +57,7 @@ namespace OpenHardwareMonitor
                         DatabaseHelper.InitializeDatabase();
                         DatabaseHelper.PruneOldData(dataLifetime);
                         Console.WriteLine($"Pruned data older than {dataLifetime.TotalDays} days.");
+                        Logger.Info($"Pruned data older than {dataLifetime.TotalDays} days.");
                         return;
                     }
                 }
@@ -73,7 +76,9 @@ namespace OpenHardwareMonitor
                 catch (DatabaseInitializationException ex)
                 {
                     Console.WriteLine($"Failed to initialize database: {ex.Message}");
+                    Logger.Error($"Failed to initialize database: {ex.Message}");
                     Console.WriteLine("The application will exit.");
+                    Logger.Info("The application will exit.");
                     return;
                 }
                 Computer = new Computer
@@ -102,6 +107,7 @@ namespace OpenHardwareMonitor
                         catch (Exception ex)
                         {
                             Console.WriteLine($"Timer event failed: {ex.Message}");
+                            Logger.Error($"Timer event failed: {ex.Message}");
                         }
                     }
                 };
@@ -114,12 +120,15 @@ namespace OpenHardwareMonitor
                     try
                     {
                         Console.WriteLine($"\nPruning data older than {dataLifetime.TotalDays} days...");
+                        Logger.Info($"\nPruning data older than {dataLifetime.TotalDays} days...");
                         DatabaseHelper.PruneOldData(dataLifetime);
                         Console.WriteLine("Data pruning completed.");
+                        Logger.Info("Data pruning completed.");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error during pruning: {ex.Message}");
+                        Logger.Error($"Error during pruning: {ex.Message}");
                     }
                 };
                 pruningTimer.AutoReset = true;
@@ -147,6 +156,7 @@ namespace OpenHardwareMonitor
             catch (Exception ex)
             {
                 Console.WriteLine($"Fatal error: {ex.Message}");
+                Logger.Critical($"Fatal error: {ex.Message}");
                 Console.WriteLine("The application will exit.");
                 Environment.Exit(1);
             }
@@ -156,6 +166,7 @@ namespace OpenHardwareMonitor
         {
             if (string.IsNullOrWhiteSpace(arg))
                 throw new ArgumentException("Lifetime argument cannot be empty");
+                Logger.Error("Lifetime argument cannot be empty");
 
             TimeSpan total = TimeSpan.Zero;
 
@@ -167,6 +178,7 @@ namespace OpenHardwareMonitor
 
             if (parts.Count == 0)
                 throw new ArgumentException("Invalid lifetime format");
+                Logger.Error("Invalid lifetime format");
 
             foreach (var part in parts)
             {
@@ -175,6 +187,7 @@ namespace OpenHardwareMonitor
 
                 if (!int.TryParse(numberPart, out int value))
                     throw new ArgumentException($"Invalid number in lifetime segment: {part}");
+                    Logger.Error($"Invalid number in lifetime segment: {part}");
 
                 switch (unit)
                 {
@@ -193,6 +206,7 @@ namespace OpenHardwareMonitor
         {
             DateTime timestamp = DateTime.Now;
             Console.WriteLine($"\n=== Reading sensor data at {timestamp} ===");
+            Logger.Info($"\n=== Reading sensor data at {timestamp} ===");
 
             try
             {
@@ -229,6 +243,7 @@ namespace OpenHardwareMonitor
 
                     // Process all sensors for this hardware
                     Console.WriteLine($"\n{hardwareItem.Name} ({hardwareItem.HardwareType})");
+                    Logger.Info($"\n{hardwareItem.Name} ({hardwareItem.HardwareType})");
                     foreach (var sensor in hardwareItem.Sensors)
                     {
                         if (!sensor.Value.HasValue)
@@ -246,12 +261,14 @@ namespace OpenHardwareMonitor
                         {
                             powerConsumption = sensor.Value.Value;
                             Console.WriteLine($"  Power: {sensor.Name} = {powerConsumption}W");
+                            Logger.Info($"  Power: {sensor.Name} = {powerConsumption}W");
                         }
                         // Load monitoring
                         else if (sensor.SensorType == SensorType.Load)
                         {
                             load = sensor.Value.Value;
                             Console.WriteLine($"  Load: {sensor.Name} = {load}%");
+                            Logger.Info($"  Load: {sensor.Name} = {load}%");
                         }
                         // Clock monitoring
                         else if (sensor.SensorType == SensorType.Clock)
@@ -270,6 +287,7 @@ namespace OpenHardwareMonitor
                         {
                             vRam = (int)sensor.Value.Value;
                             Console.WriteLine($"  VRAM: {vRam} MB");
+                            Logger.Info($"  VRAM: {vRam} MB");
                         }
                     }
 
@@ -302,20 +320,25 @@ namespace OpenHardwareMonitor
                         );
 
                         Console.WriteLine($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, load={load}, PowerConsumption={powerConsumption}, CoreSpeed={currentCoreClock}, MemorySpeed={currentMemoryClock}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.Add(dataLifetime)}");
+                        Logger.Info($"Component Statistic: SerialNumber={serialNumber}, Timestamp={timestamp}, MachineState=Active, Temperature={temperature}, load={load}, PowerConsumption={powerConsumption}, CoreSpeed={currentCoreClock}, MemorySpeed={currentMemoryClock}, TotalRAM={GetTotalRAM()}, EndOfLife={timestamp.Add(dataLifetime)}");
                         Console.WriteLine($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
+                        Logger.Info($"Component: SerialNumber={serialNumber}, DeviceType={deviceType}, VRAM={vRam}, StockCoreSpeed={stockCoreSpeed}, StockMemorySpeed={stockMemorySpeed}");
                     }
                     catch (DatabaseOperationException ex)
                     {
                         Console.WriteLine($"Failed to update database for {deviceType} {serialNumber}: {ex.Message}");
+                        Logger.Error($"Failed to update database for {deviceType} {serialNumber}: {ex.Message}");
                         if (ex.InnerException != null)
                         {
                             Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                            Logger.Critical($"Inner exception: {ex.InnerException.Message}");
                         }
                     }
                 }
 
                 // Process monitoring
                 Console.WriteLine("\nProcess Monitoring:");
+                Logger.Info("\nProcess Monitoring:");
                 Process[] processes = Process.GetProcesses();
                 foreach (Process process in processes)
                 {
@@ -345,15 +368,18 @@ namespace OpenHardwareMonitor
                                 );
 
                                 Console.WriteLine($"  PID {process.Id}: CPU={cpuUsage}%, RAM={memoryUsage}MB");
+                                Logger.Info($"  PID {process.Id}: CPU={cpuUsage}%, RAM={memoryUsage}MB");
                             }
                             catch (DatabaseOperationException ex)
                             {
                                 Console.WriteLine($"  Failed to insert process {process.ProcessName} (PID: {process.Id}): {ex.Message}");
+                                Logger.Error($"  Failed to insert process {process.ProcessName} (PID: {process.Id}): {ex.Message}");
                             }
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine($"  Error accessing process {process.ProcessName}: {ex.Message}");
+                            Logger.Error($"  Error accessing process {process.ProcessName}: {ex.Message}");
                         }
                     }
                 }
@@ -361,6 +387,7 @@ namespace OpenHardwareMonitor
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during data collection: {ex.Message}");
+                Logger.Error($"Error during data collection: {ex.Message}");
             }
         }
 
@@ -421,6 +448,7 @@ namespace OpenHardwareMonitor
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving RAM information: {ex.Message}");
+                Logger.Error($"Error retrieving RAM information: {ex.Message}");
             }
             return 0;
         }
@@ -439,6 +467,7 @@ namespace OpenHardwareMonitor
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving {wmiClass} serial number: {ex.Message}");
+                Logger.Error($"Error retrieving {wmiClass} serial number: {ex.Message}");
             }
             return "Not Available";
         }
@@ -461,6 +490,7 @@ namespace OpenHardwareMonitor
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving CPU base clock speed: {ex.Message}");
+                Logger.Error($"Error retrieving CPU base clock speed: {ex.Message}");
             }
             return 0;
         }
@@ -484,6 +514,7 @@ namespace OpenHardwareMonitor
             catch (Exception ex)
             {
                 Console.WriteLine($"Error retrieving RAM speed: {ex.Message}");
+                Logger.Error($"Error retrieving RAM speed: {ex.Message}");
             }
             return 0;
         }
@@ -498,6 +529,7 @@ namespace OpenHardwareMonitor
         public static Action RelaunchAsAdministrator = () =>
         {
             Console.WriteLine("Program requires administrator privileges. Relaunching...");
+            Logger.Error("Program requires administrator privileges. Relaunching...");
             System.Threading.Thread.Sleep(2000);
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
@@ -512,6 +544,7 @@ namespace OpenHardwareMonitor
             catch (System.ComponentModel.Win32Exception)
             {
                 Console.WriteLine("You must run this program as an administrator.");
+                Logger.Error("You must run this program as an administrator.");
             }
 
             Environment.Exit(0);
