@@ -165,30 +165,18 @@ namespace OpenHardwareMonitor
 
         private static TimeSpan ParseLifetimeArgument(string arg)
         {
-            if (string.IsNullOrWhiteSpace(arg))
-                throw new ArgumentException("Lifetime argument cannot be empty");
-                Logger.Error("Lifetime argument cannot be empty");
-
             TimeSpan total = TimeSpan.Zero;
 
-            // Split the argument into parts (e.g., "1m2w3d" -> ["1m", "2w", "3d"])
-            var parts = System.Text.RegularExpressions.Regex.Matches(arg, @"(\d+[dwmy])")
-                .Cast<System.Text.RegularExpressions.Match>()
-                .Select(m => m.Value)
-                .ToList();
+            // Check if the entire argument matches our expected format
+            var matches = System.Text.RegularExpressions.Regex.Matches(arg, @"(\d+[dwmy])");
+            if (matches.Count == 0)
+                throw new ArgumentException($"Invalid lifetime format: '{arg}'. Use format like 1y1m1w1d");
 
-            if (parts.Count == 0)
-                throw new ArgumentException("Invalid lifetime format");
-                Logger.Error("Invalid lifetime format");
-
-            foreach (var part in parts)
+            foreach (System.Text.RegularExpressions.Match match in matches)
             {
+                string part = match.Value;
                 char unit = part[part.Length - 1];
-                string numberPart = part.Substring(0, part.Length - 1);
-
-                if (!int.TryParse(numberPart, out int value))
-                    throw new ArgumentException($"Invalid number in lifetime segment: {part}");
-                    Logger.Error($"Invalid number in lifetime segment: {part}");
+                int value = int.Parse(part.Substring(0, part.Length - 1));
 
                 switch (unit)
                 {
@@ -530,6 +518,7 @@ namespace OpenHardwareMonitor
         public static Action RelaunchAsAdministrator = () =>
         {
             Console.WriteLine("Program requires administrator privileges. Relaunching...");
+            Logger.Info("Program requires administrator privileges. Relaunching...");
             System.Threading.Thread.Sleep(2000);
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
