@@ -22,11 +22,9 @@ namespace OpenHardwareMonitor
         private static readonly string LogFileExtension = ".log";
         private static string FullLogPath;
         private static readonly LogLevel MinimumLogLevel;
-        private static readonly bool LogToConsole;
-        private static readonly bool LogToFile;
         private static readonly long MaxLogFileSize = 5 * 1024 * 1024; // 5MB
-        private static readonly int MaxLogFilesToKeep = 10;
         private static readonly object fileLock = new object();
+        private static readonly Mutex globalMutex = new Mutex(false, @"Global\OHM_Logger_Mutex");
 
         static Logger()
         {
@@ -35,8 +33,6 @@ namespace OpenHardwareMonitor
 
             // Parse configuration settings with defaults
             Enum.TryParse(ConfigurationManager.AppSettings["MinimumLogLevel"], out MinimumLogLevel);
-            bool.TryParse(ConfigurationManager.AppSettings["LogToConsole"], out LogToConsole);
-            bool.TryParse(ConfigurationManager.AppSettings["LogToFile"], out LogToFile);
 
             // Configure log file rotation
             ConfigureLogFileRotation();
@@ -60,10 +56,11 @@ namespace OpenHardwareMonitor
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 FullLogPath = Path.Combine(LogDirectory, $"{LogFilePrefix}{timestamp}{LogFileExtension}");
 
-                if (!File.Exists(FullLogPath)){
-                    File.Create(FullLogPath);
+                // Create file if it doesn't exist (auto-closes handle)
+                if (!File.Exists(FullLogPath))
+                {
+                    using (File.Create(FullLogPath)) { }
                 }
-               
             }
             catch (Exception ex)
             {
@@ -71,23 +68,19 @@ namespace OpenHardwareMonitor
             }
         }
 
-
         private static void RotateLogFileIfNeeded()
         {
             try
             {
-                if (new FileInfo(FullLogPath).Length > MaxLogFileSize)
+                var fileInfo = new FileInfo(FullLogPath);
+                if (fileInfo.Exists && fileInfo.Length > MaxLogFileSize)
                 {
-                    lock (fileLock)
-                    {
-                        if (new FileInfo(FullLogPath).Length > MaxLogFileSize)
-                        {
-                            string newFilePath = Path.Combine(LogDirectory,
-                                $"{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}{LogFileExtension}");
-                            File.Move(FullLogPath, newFilePath);
-                            File.Create(FullLogPath).Close(); // Create new empty log file
-                        }
-                    }
+                    string newFilePath = Path.Combine(
+                        LogDirectory,
+                        $"{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}{LogFileExtension}");
+                    
+                    File.Move(FullLogPath, newFilePath);
+                    using (File.Create(FullLogPath)) { } // Create new empty log file
                 }
             }
             catch (Exception ex)
@@ -104,30 +97,34 @@ namespace OpenHardwareMonitor
             string logEntry = FormatLogEntry(level, message, exception);
             string detailedEntry = FormatDetailedLogEntry(level, message, exception);
 
-            // Console logging (colored)
-            if (LogToConsole)
-            {
-                ConsoleColor originalColor = Console.ForegroundColor;
-                Console.ForegroundColor = GetConsoleColor(level);
-                Console.WriteLine(logEntry);
-                Console.ForegroundColor = originalColor;
-            }
+
+            bool mutexAcquired = false;
             try
             {
-                RotateLogFileIfNeeded();
+                // Wait up to 1 second to acquire the global mutex
+                mutexAcquired = globalMutex.WaitOne(1000);
+                if (!mutexAcquired)
+                {
+                    Console.WriteLine("Failed to acquire logging mutex");
+                    return;
+                }
 
                 lock (fileLock)
                 {
-                    // Use a StreamWriter with explicit flushing for more reliable logging
-                    using (var writer = new StreamWriter(FullLogPath, true))
-                    {
-                        writer.WriteLine(detailedEntry);
-                    }
+                    RotateLogFileIfNeeded();
+                    
+                    // Use File.AppendAllText which handles its own streams
+                    File.AppendAllText(FullLogPath, detailedEntry + Environment.NewLine);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to write to log file: {ex.Message}");
+            }
+            finally
+            {
+                if (mutexAcquired)
+                    globalMutex.ReleaseMutex();
             }
         }
 
@@ -162,25 +159,6 @@ namespace OpenHardwareMonitor
             }
 
             return entry;
-        }
-
-        private static ConsoleColor GetConsoleColor(LogLevel level)
-        {
-            switch (level)
-            {
-                case LogLevel.Debug:
-                    return ConsoleColor.Gray;
-                case LogLevel.Info:
-                    return ConsoleColor.White;
-                case LogLevel.Warning:
-                    return ConsoleColor.Yellow;
-                case LogLevel.Error:
-                    return ConsoleColor.Red;
-                case LogLevel.Critical:
-                    return ConsoleColor.DarkRed;
-                default:
-                    return ConsoleColor.White;
-            }
         }
     }
 }
