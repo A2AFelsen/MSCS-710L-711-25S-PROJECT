@@ -13,6 +13,7 @@ import psutil
 import os
 import subprocess
 import db_interface
+import re
 
 
 def is_metrics_running():
